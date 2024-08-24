@@ -94,7 +94,7 @@ with IN:
         st.dataframe(df2)
 
         st.subheader('Figure 1. Quatre scénarios envisagés pour l’analyse du cycle de vie à l’aide de SimaPro sont représentés')
-        st.image('data/Figure1.png', caption="Quatre scénarios envisagés")
+        st.image('Data/Figure1.png', caption="Quatre scénarios envisagés")
 
 with VC:
         
@@ -165,7 +165,7 @@ with TR:
 
             # Función para cargar los datos desde un archivo CSV con delimitador ','
             def load_data():
-                df = pd.read_csv('data/graphvc2.csv', delimiter=',', header=0)
+                df = pd.read_csv('Data/graphvc2.csv', delimiter=',', header=0)
                 return df
 
             # Crear el gráfico de barras apiladas horizontal con categorías agrupadas
