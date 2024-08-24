@@ -1,0 +1,19 @@
+Categoría de impacto,Unidad,P1 Menkao,P2 Madimba,P3 Mbanza Ngungu,P4 Seeke-Banza,P5 Kwango / Plateau Bateke,P6 Kwilu,P7 Sud-Kivu,P8 Tshopo
+Climate change,kg CO2 eq,46.8,22.7,25.5,25.8,27.1,43.2,30.1,11.1
+Ozone depletion,kg CFC-11 eq,5.83e-06,9.71e-07,1.34e-06,5.82e-07,1.56e-06,1.07e-06,3.62e-06,1.07e-06
+Terrestrial acidification,kg SO2 eq,3.12,0.532,0.713,0.546,3.89,0.205,0.081,0.039
+Freshwater eutrophication,kg P eq,3.23,0.754,1.13,0.566,0.754,0.97,0.797,0.31
+Marine eutrophication,kg N eq,0.0165,0.00283,0.00376,0.00187,0.00428,0.00976,0.00468,0.000768
+Human toxicity,"kg 1,4-DB eq",5.76,0.961,1.33,0.576,3.71,3.06,3.58,1.05
+Photochemical oxidant formation,kg NMVOC,0.474,0.081,0.108,0.0532,0.283,0.314,0.129,0.129
+Particulate matter formation,kg PM10 eq,0.168,0.0284,0.0384,0.0181,0.103,0.108,0.0401,0.0401
+Terrestrial ecotoxicity,"kg 1,4-DB eq",0.00715,0.00119,0.00165,0.000715,0.00461,0.00444,0.00131,0.000449
+Freshwater ecotoxicity,"kg 1,4-DB eq",0.0224,0.00374,0.00516,0.00224,0.0145,0.0139,0.0041,0.00131
+Marine ecotoxicity,"kg 1,4-DB eq",0.0418,0.00802,0.0111,0.0048,0.0299,0.029,0.0088,0.00299
+Ionising radiation,kBq U235 eq,2.17,0.362,0.499,0.217,1.4,1.35,0.397,0.088
+Agricultural land occupation,m2a,8.18,1.36,1.88,0.817,5.27,5.08,1.5,1.5
+Urban land occupation,m2a,1.84,0.307,0.424,0.184,1.15,1.19,0.337,0.337
+Natural land transformation,m2,0.0126,0.00211,0.00291,0.00337,0.00333,0.00785,0.00231,0.000231
+Water depletion,m3,0.0946,0.066,0.0793,0.0993,0.0641,0.0541,0.0182,0.0182
+Metal depletion,kg Fe eq,4.76,0.793,1.09,0.475,2.96,2.87,0.871,0.871
+Fossil depletion,kg oil eq,13.2,2.2,3.04,1.32,8.5,8.2,2.41,2.41
