@@ -243,7 +243,7 @@ with TR:
                 st.title('Visualisation des impacts environnementaux de la production de 1 ton de fufu dans quatre localités')
                 df = load_data()
 
-                st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation (unités arbitraires).")
+                st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
 
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of impact'].unique().tolist()
