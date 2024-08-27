@@ -131,7 +131,7 @@ with VC:
 
             # Configuración de Streamlit
             st.title("Analyse comparative de la chaîne de valeur (agrégée)")
-            st.write("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation (unités arbitraires).")
+            st.write("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
 
 
 
