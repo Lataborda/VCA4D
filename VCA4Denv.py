@@ -61,6 +61,7 @@ with IN:
 
         # Creación del DataFrame para la primera tabla
         df1 = pd.DataFrame(data1)
+        df1.set_index('Parcelle', inplace=True)
 
         # Datos de la segunda tabla
         data2 = {
@@ -83,6 +84,7 @@ with IN:
 
         # Creación del DataFrame para la segunda tabla
         df2 = pd.DataFrame(data2)
+        df2.set_index('Unité de transformation', inplace=True)
 
         # Despliegue de los DataFrames en Streamlit
         st.title('Données d’inventaire de cycle de vie (ICV)')
