@@ -88,10 +88,10 @@ with IN:
         st.title('Données d’inventaire de cycle de vie (ICV)')
 
         st.subheader('Tableau 1: ICV pour la culture du manioc et le transport du champ vers l’unité de transformation')
-        st.dataframe(df1)
+        st.dataframe(df1.T)
 
         st.subheader('Tableau 2: ICV pour la transformation du manioc en fufu et le transport vers le centre de distribution')
-        st.dataframe(df2)
+        st.dataframe(df2.T)
 
         st.subheader('Figure 1. Quatre scénarios envisagés pour l’analyse du cycle de vie à l’aide de SimaPro sont représentés')
         st.image('Data/Figure2.png', caption="Quatre scénarios envisagés")
