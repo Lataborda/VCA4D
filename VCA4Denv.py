@@ -167,7 +167,7 @@ with TR:
 
             # Función para cargar los datos desde un archivo CSV con delimitador ','
             def load_data():
-                df = pd.read_csv('Data/graphvc2.csv', delimiter=',', header=0)
+                df = pd.read_csv('Data/grv2c.csv', delimiter=',', header=0)
                 return df
 
             # Crear el gráfico de barras apiladas horizontal con categorías agrupadas
