@@ -364,7 +364,7 @@ with PR:
 
                 # Crear y mostrar el gráfico
                 fig, ax = plt.subplots(figsize=(10, 8))
-                filtered_data.plot(kind='barh', ax=ax, linewidth=1.5, edgecolor='black')
+                filtered_data.plot(kind='barh', ax=ax)
                 ax.set_xlabel("Pourcentage de la valeur maximale (%)")
                 ax.set_title("Évaluation de l'Impact par Catégorie et Localité")
                 st.pyplot(fig)
