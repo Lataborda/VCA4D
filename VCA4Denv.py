@@ -153,7 +153,7 @@ with VC:
 
                 # Crear y mostrar el gráfico
                 fig, ax = plt.subplots(figsize=(10, 8))
-                filtered_data.plot(kind='barh', ax=ax, width=0.9)
+                filtered_data.plot(kind='barh', ax=ax, width=0.7)
                 ax.set_xlabel("Percentage of Max Value (%)")
                 ax.set_title("Impact Assessment by Category and Location")
                 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
