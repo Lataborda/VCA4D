@@ -367,6 +367,7 @@ with PR:
                 filtered_data.plot(kind='barh', ax=ax, width=0.9)
                 ax.set_xlabel("Pourcentage de la valeur maximale (%)")
                 ax.set_title("Évaluation de l'Impact par Catégorie et Localité")
+                ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
                 st.pyplot(fig)
             else:
                 st.write("Aucune localité sélectionnée. Veuillez en sélectionner au moins une.")
