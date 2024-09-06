@@ -98,7 +98,7 @@ with IN:
         st.subheader('Figure 1. Quatre scénarios envisagés pour l’analyse du cycle de vie à l’aide de SimaPro sont représentés')
         st.image('Data/Figure2.png', caption="Quatre scénarios envisagés")
 
-with ES
+with ES:
     if DD == "**Comparaison des scénarios**":
             
             # Data from the image you provided
