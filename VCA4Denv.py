@@ -11,7 +11,7 @@ VC = st.container() #Cassava Value Chain (agrégée)
 PR = st.container() #Production de racines de manioc
 TR = st.container() #Cassava Value Chain (désagrégée)
 IN = st.container() #inventary of data
-
+ES = st.container() #Scenaria assessment
 
 with header:
 
@@ -24,8 +24,8 @@ with header:
     
     DD = st.sidebar.radio(
         "Sélectionnez le type de données que vous souhaitez afficher",
-        ["**Inventaire de Cycle de Vie (ICV)**","**Cassava Value Chain (agrégée)**", "**Cassava Value Chain (désagrégée)**","**Production de racines de manioc**" ],
-        captions = ["Intrants Agricoles et Unités de transformation du manioc en fufu","Montrant les impacts globaux", "Analysant chaque étape du processus séparément", "Production de manioc dans 8 sites différents en RDC"])
+        ["**Inventaire de Cycle de Vie (ICV)**","**Comparaison des scénarios**","**Cassava Value Chain (agrégée)**", "**Cassava Value Chain (désagrégée)**","**Production de racines de manioc**" ],
+        captions = ["Intrants Agricoles et Unités de transformation du manioc en fufu","Impacts de chaque système de transformation","Montrant les impacts globaux", "Analysant chaque étape du processus séparément", "Production de manioc dans 8 sites différents en RDC"])
 
 with IN:
 
@@ -97,6 +97,67 @@ with IN:
 
         st.subheader('Figure 1. Quatre scénarios envisagés pour l’analyse du cycle de vie à l’aide de SimaPro sont représentés')
         st.image('Data/Figure2.png', caption="Quatre scénarios envisagés")
+
+with ES
+    if DD == "**Comparaison des scénarios**":
+            
+            # Data from the image you provided
+            data = {
+                "Category": ["Climate change", "Ozone depletion", "Terrestrial acidification", "Freshwater eutrophication", "Marine eutrophication", 
+                             "Human toxicity", "Photochemical oxidant formation", "Particulate matter formation", "Terrestrial ecotoxicity", 
+                             "Freshwater ecotoxicity", "Marine ecotoxicity", "Ionising radiation", "Agricultural land occupation", "Urban land occupation", 
+                             "Natural land transformation", "Water depletion", "Metal depletion", "Fossil depletion"],
+                "Unit": ["kg CO2 eq", "kg CFC-11 eq", "kg SO2 eq", "kg P eq", "kg N eq", 
+                         "kg 1,4-DB eq", "kg NMVOC", "kg PM10 eq", "kg 1,4-DB eq", 
+                         "kg 1,4-DB eq", "kg 1,4-DB eq", "kBq U235 eq", "m2a", "m2a", 
+                         "m2", "m3", "kg Fe eq", "kg oil eq"],
+                "S1_farine_panifiable": [399, 5.29e-5, 2.53, 0.00561, 0.124, 50.1, 3.62, 1.35, 0.063, 0.254, 0.449, 19.3, 68, 15.3, 0.105, 0.926, 39.5, 123],
+                "S2_fufu_amelioree": [399, 5.29e-5, 2.53, 0.00561, 0.124, 50.1, 3.62, 1.35, 0.063, 0.254, 0.449, 19.3, 68, 15.3, 0.105, 0.926, 39.5, 123],
+                "S3_Microcosssettes": [15.4, 1.37e-5, 0.126, 0.000212, 0.00222, 1.63, 0.0898, 0.039, 0.00268, 0.0352, 0.0356, 4.58, 0.291, 0.14, 0.0276, 0.0634, 0.473, 26.8],
+                "S4_Fufu_conventionnel": [23.7, 2.27e-5, 0.203, 0.000295, 0.00349, 2.65, 0.142, 0.0621, 0.00437, 0.0577, 0.0587, 7.57, 0.346, 0.227, 0.0459, 3.79, 0.783, 43.5]
+            }
+            
+            # Crear DataFrame
+            df = pd.DataFrame(data)
+            
+            # Combinar categoría con unidad
+            df['Category'] = df['Category'] + " (" + df['Unit'] + ")"
+            
+            # Eliminar la columna 'Unit' ya que ya está combinada
+            df.drop('Unit', axis=1, inplace=True)
+            
+            # Normalizar los valores al máximo de cada fila
+            df_normalized = df.set_index("Category")
+            df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
+            
+            # Configuración de Streamlit
+            st.title("Analyse comparatif des différents systèmes de transformation de yuca en DRC")
+            st.write("Impacts environnementaux potentiels de la production d'une tonne de chaque produit transformé en les quatre scénarios.")
+            
+            # Mostrar el DataFrame original y normalizado
+            st.subheader("Données de sortie SIMAPRO")
+            st.dataframe(df)
+            st.subheader("Données normalisées")
+            st.write("Pour chaque catégorie d’impact, l’unité de transformation avec l’impact le plus élevé est représentée avec un indice 100 (au lieu des unités d’origine), pour faciliter les comparaisons.")
+            
+            st.dataframe(df_normalized)
+            
+            # Selector múltiple para las columnas
+            options = st.multiselect("Sélectionnez les lieux à afficher:", ["S1_farine_panifiable", "S2_fufu_amelioree", "S3_Microcosssettes", "S4_Fufu_conventionnel"], default=["S1_farine_panifiable","S2_fufu_amelioree", "S3_Microcosssettes", "S4_Fufu_conventionnel"])
+            
+            # Filtrar el dataframe para incluir solo las columnas seleccionadas
+            if options:
+                filtered_data = df_normalized[options]
+            
+                # Crear y mostrar el gráfico
+                fig, ax = plt.subplots(figsize=(10, 8))
+                filtered_data.plot(kind='barh', ax=ax, width=0.7)
+                ax.set_xlabel("Percentage of Max Value (%)")
+                ax.set_title("Impact Assessment by Category and Location")
+                ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+                st.pyplot(fig)
+            else:
+                st.write("No locations selected. Please select at least one location.")
 
 with VC:
         
