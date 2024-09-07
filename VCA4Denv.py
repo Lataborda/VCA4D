@@ -436,7 +436,7 @@ with PR:
 
 with EN:
     if DD == "**EndPoint single score (pt)**":
-      
+ 
 
             # Datos extraídos de la imagen estructurados en un diccionario
             data = {
@@ -455,8 +455,8 @@ with EN:
             
             df = pd.DataFrame(data)
             
-            # Función para crear el gráfico de barras apiladas horizontal con categorías agrupadas
-            def create_stacked_bar_chart(df, selected_categories, selected_locations):
+            # Función para crear el gráfico de barras con etiquetas
+            def create_bar_chart_with_labels(df, selected_categories, selected_locations):
                 fig = go.Figure()
             
                 # Definir colores para cada tipo de impacto
@@ -479,39 +479,28 @@ with EN:
                     for location in locations:
                         y_labels.append(f"{category} - {location}")
             
-                # Añadir barras apiladas para cada categoría y localidad
+                # Añadir barras para cada categoría y localidad con etiquetas
                 for column in ['Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']:
                     values = []
                     for category in categories:
                         for location in locations:
                             value = df_filtered[(df_filtered['Category of Impact'] == category) & (df_filtered['VC'] == location)][column].values
                             values.append(value[0] if len(value) > 0 else 0)
+                    
                     fig.add_trace(go.Bar(
                         y=y_labels,
                         x=values,
                         name=column,
                         orientation='h',
-                        marker_color=colors[column]
+                        marker_color=colors[column],
+                        text=values,  # Añadir el valor como texto
+                        textposition='auto'  # Ubicar el texto automáticamente
                     ))
-            
-                # Agregar anotaciones (etiquetas) al lado de las barras más grandes
-                for i, y_label in enumerate(y_labels):
-                    total_value = sum([df_filtered[(df_filtered['Category of Impact'] == y_label.split(" - ")[0]) & (df_filtered['VC'] == y_label.split(" - ")[1])][col].values[0] for col in colors.keys()])
-                    location = y_label.split(" - ")[1]
-                    fig.add_annotation(
-                        x=total_value + 0.5,  # Coloca la etiqueta al lado de la barra
-                        y=y_label,
-                        text=location,
-                        showarrow=False,
-                        font=dict(size=12),
-                        xanchor="left",
-                        yanchor="middle"
-                    )
             
                 # Mejora la disposición de las etiquetas en el eje Y
                 fig.update_layout(
-                    barmode='stack',
-                    title="Impacts environnementaux classés par catégorie et par lieu",
+                    barmode='group',
+                    title="Impactos ambientales clasificados por categoría y lugar",
                     xaxis=dict(title="Impacto"),
                     yaxis=dict(
                         title="Categoría de Impacto",
@@ -520,28 +509,28 @@ with EN:
                         ticktext=categories
                     ),
                     showlegend=True,
-                    height=1500  # Ajustar según sea necesario
+                    height=1000  # Ajustar según sea necesario
                 )
             
                 return fig, df_filtered
             
             # Función principal para ejecutar la aplicación Streamlit
             def main():
-                st.title('Visualisation des impacts environnementaux de la production de 1 ton de fufu dans quatre localités')
+                st.title('Visualización de los impactos ambientales de la producción de 1 ton de fufu en cuatro localidades')
                 # Los datos ya están cargados en df
             
-                st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
+                st.subheader("Impactos ambientales potenciales de la producción de una tonelada de fufu a partir de cuatro unidades de transformación.")
             
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of Impact'].unique().tolist()
                 all_locations = df['VC'].unique().tolist()
             
                 # Crear selectores multiselect para categorías de impacto y localidades
-                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
-                selected_locations = st.multiselect('Sélectionner les lieux', all_locations, default=all_locations)
+                selected_categories = st.multiselect("Seleccionar categorías de impacto", all_categories, default=all_categories)
+                selected_locations = st.multiselect('Seleccionar localidades', all_locations, default=all_locations)
             
                 # Crear la gráfica con las categorías y localidades seleccionadas
-                fig, df_filtered = create_stacked_bar_chart(df, selected_categories, selected_locations)
+                fig, df_filtered = create_bar_chart_with_labels(df, selected_categories, selected_locations)
                 st.plotly_chart(fig, use_container_width=True)
             
                 # Reorganizar las columnas para que "Category of Impact" sea la primera
@@ -549,7 +538,7 @@ with EN:
                 df_filtered = df_filtered[columns_order]
             
                 # Mostrar la tabla con los datos filtrados
-                st.subheader("Données normalisées et désagrégées par catégorie d'impact et par lieu.")
+                st.subheader("Datos normalizados y desagregados por categoría de impacto y lugar.")
                 st.dataframe(df_filtered)
             
             if __name__ == "__main__":
