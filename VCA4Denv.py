@@ -498,7 +498,7 @@ with EN:
                     height=600,
                     width=800,
                     showlegend=True,
-                    bargap=1,  # Elimina el espacio entre las barras
+                    bargap=0.1,  # Elimina el espacio entre las barras
                 )
             
                 return fig
