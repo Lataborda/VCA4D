@@ -550,7 +550,10 @@ with EN:
             
                 # Mostrar la tabla con los datos filtrados
                 st.subheader("Données normalisées et désagrégées par catégorie d'impact et par lieu.")
-                
+                st.dataframe(df_filtered)
+
+            if __name__ == "__main__":
+                main()                
 
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
