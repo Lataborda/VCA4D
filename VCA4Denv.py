@@ -487,8 +487,8 @@ with EN:
                 fig.update_layout(
                     barmode='group',
                     title="Impactos ambientales clasificados por categoría y lugar",
-                    xaxis=dict(title="Puntuación total del impacto"),
-                    yaxis=dict(title="Categoría de Impacto"),
+                    xaxis=dict(title="Endpoint single score (Pt)"),
+                    yaxis=dict(title="Category de Impact"),
                     height=600,
                     width=800,
                     showlegend=True,
