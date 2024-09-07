@@ -462,7 +462,7 @@ with EN:
                 # Definir colores para cada ubicación (como se solicitó)
                 colors = {
                     'VC. Kinshasa': 'blue',
-                    'VC. Madimba': 'yellow',
+                    'VC. Madimba': 'orange',
                     'VC. Matadi': 'green',
                     'VC. Plateau': 'red'
                 }
