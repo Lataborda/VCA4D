@@ -437,7 +437,7 @@ with PR:
 with EN:
     if DD == "**EndPoint single score (pt)**":
  
-
+                 
             # Datos extraídos de la imagen estructurados en un diccionario
             data = {
                 'Category of Impact': ['Ecosystems', 'Ecosystems', 'Ecosystems', 'Ecosystems',
@@ -455,71 +455,51 @@ with EN:
             
             df = pd.DataFrame(data)
             
-            # Función para crear el gráfico de barras con etiquetas
-            def create_bar_chart_with_labels(df, selected_categories, selected_locations):
+            # Función para crear el gráfico de barras agrupadas en horizontal con etiquetas
+            def create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations):
                 fig = go.Figure()
             
-                # Definir colores para cada tipo de impacto
+                # Definir colores para cada ubicación (similar a la imagen de referencia)
                 colors = {
-                    'Production': 'blue',
-                    'Transport à l\'usine': 'orange',
-                    'Transformation': 'green',
-                    'Transport au marché': 'red'
+                    'VC. Kinshasa': 'blue',
+                    'VC. Madimba': 'orange',
+                    'VC. Matadi': 'green',
+                    'VC. Plateau': 'red'
                 }
             
                 # Filtrar las categorías y localidades seleccionadas
                 df_filtered = df[(df['Category of Impact'].isin(selected_categories)) & (df['VC'].isin(selected_locations))]
             
-                categories = df_filtered['Category of Impact'].unique()
-                locations = df_filtered['VC'].unique()
+                # Crear barras para cada ubicación
+                for location in selected_locations:
+                    for category in selected_categories:
+                        df_location = df_filtered[df_filtered['VC'] == location]
+                        fig.add_trace(go.Bar(
+                            y=[category],
+                            x=df_location[df_location['Category of Impact'] == category]['Total'],
+                            name=location,
+                            orientation='h',
+                            marker_color=colors[location],
+                            text=df_location[df_location['Category of Impact'] == category]['Total'],
+                            textposition='auto'
+                        ))
             
-                # Crear etiquetas en el eje Y con categorías y localidades combinadas
-                y_labels = []
-                for category in categories:
-                    for location in locations:
-                        y_labels.append(f"{category} - {location}")
-            
-                # Añadir barras para cada categoría y localidad con etiquetas
-                for column in ['Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']:
-                    values = []
-                    for category in categories:
-                        for location in locations:
-                            value = df_filtered[(df_filtered['Category of Impact'] == category) & (df_filtered['VC'] == location)][column].values
-                            values.append(value[0] if len(value) > 0 else 0)
-                    
-                    fig.add_trace(go.Bar(
-                        y=y_labels,
-                        x=values,
-                        name=column,
-                        orientation='h',
-                        marker_color=colors[column],
-                        text=values,  # Añadir el valor como texto
-                        textposition='auto'  # Ubicar el texto automáticamente
-                    ))
-            
-                # Mejora la disposición de las etiquetas en el eje Y
+                # Configurar el diseño del gráfico
                 fig.update_layout(
                     barmode='group',
                     title="Impactos ambientales clasificados por categoría y lugar",
-                    xaxis=dict(title="Impacto"),
-                    yaxis=dict(
-                        title="Categoría de Impacto",
-                        tickmode="array",
-                        tickvals=[i * len(locations) + len(locations) / 2 - 0.5 for i in range(len(categories))],
-                        ticktext=categories
-                    ),
-                    showlegend=True,
-                    height=1000  # Ajustar según sea necesario
+                    xaxis=dict(title="Puntuación total del impacto"),
+                    yaxis=dict(title="Categoría de Impacto"),
+                    height=600,
+                    width=800,
+                    showlegend=True
                 )
             
-                return fig, df_filtered
+                return fig
             
             # Función principal para ejecutar la aplicación Streamlit
             def main():
                 st.title('Visualización de los impactos ambientales de la producción de 1 ton de fufu en cuatro localidades')
-                # Los datos ya están cargados en df
-            
-                st.subheader("Impactos ambientales potenciales de la producción de una tonelada de fufu a partir de cuatro unidades de transformación.")
             
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of Impact'].unique().tolist()
@@ -530,19 +510,15 @@ with EN:
                 selected_locations = st.multiselect('Seleccionar localidades', all_locations, default=all_locations)
             
                 # Crear la gráfica con las categorías y localidades seleccionadas
-                fig, df_filtered = create_bar_chart_with_labels(df, selected_categories, selected_locations)
+                fig = create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations)
                 st.plotly_chart(fig, use_container_width=True)
-            
-                # Reorganizar las columnas para que "Category of Impact" sea la primera
-                columns_order = ['Category of Impact', 'VC', 'Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']
-                df_filtered = df_filtered[columns_order]
             
                 # Mostrar la tabla con los datos filtrados
                 st.subheader("Datos normalizados y desagregados por categoría de impacto y lugar.")
-                st.dataframe(df_filtered)
+                st.dataframe(df)
             
             if __name__ == "__main__":
-                main()              
+                main()            
 
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
