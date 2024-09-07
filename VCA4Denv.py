@@ -12,6 +12,7 @@ PR = st.container() #Production de racines de manioc
 TR = st.container() #Cassava Value Chain (désagrégée)
 IN = st.container() #inventary of data
 ES = st.container() #Scenaria assessment
+EN = st.container() #Sendpoint
 
 with header:
 
@@ -24,8 +25,8 @@ with header:
     
     DD = st.sidebar.radio(
         "Sélectionnez le type de données que vous souhaitez afficher",
-        ["**Inventaire de Cycle de Vie (ICV)**","**Comparaison des scénarios**","**Cassava Value Chain (agrégée)**", "**Cassava Value Chain (désagrégée)**","**Production de racines de manioc**" ],
-        captions = ["Intrants Agricoles et Unités de transformation du manioc en fufu","Impacts de chaque système de transformation","Montrant les impacts globaux", "Analysant chaque étape du processus séparément", "Production de manioc dans 8 sites différents en RDC"])
+        ["**Inventaire de Cycle de Vie (ICV)**","**Comparaison des scénarios**","**Cassava Value Chain (agrégée)**", "**Cassava Value Chain (désagrégée)**","**Production de racines de manioc**","**EndPoint single score (pt)**"],
+        captions = ["Intrants Agricoles et Unités de transformation du manioc en fufu","Impacts de chaque système de transformation","Montrant les impacts globaux", "Analysant chaque étape du processus séparément", "Production de manioc dans 8 sites différents en RDC","EndPoint single score (pt)"])
 
 with IN:
 
@@ -432,6 +433,125 @@ with PR:
                 st.pyplot(fig)
             else:
                 st.write("Aucune localité sélectionnée. Veuillez en sélectionner au moins une.")
+
+with EN:
+    if DD == "**EndPoint single score (pt)**":
+      
+
+            # Cargar los datos desde un diccionario (que provienen de la tabla extraída de la imagen)
+            data = {
+                'Category of Impact': ['Ecosystems', 'Ecosystems', 'Ecosystems', 'Ecosystems',
+                                       'Human Health', 'Human Health', 'Human Health', 'Human Health',
+                                       'Resources', 'Resources', 'Resources', 'Resources'],
+                'VC': ['VC. Kinshasa', 'VC. Madimba', 'VC. Matadi', 'VC. Plateau',
+                       'VC. Kinshasa', 'VC. Madimba', 'VC. Matadi', 'VC. Plateau',
+                       'VC. Kinshasa', 'VC. Madimba', 'VC. Matadi', 'VC. Plateau'],
+                'Total': [14.9, 13, 3.97, 14, 28.2, 24.4, 6.8, 26.2, 20.9, 17.6, 7.74, 19.1],
+                'Production': [2.8, 2.31, 2.02, 2.8, 4.44, 3.49, 3.06, 4.44, 3.76, 1.18, 0.607, 1.9],
+                'Transport à l\'usine': [2.03, 0.203, 0.399, 0.406, 4.17, 0.417, 0.769, 0.834, 3.76, 0.376, 0.707, 0.752],
+                'Transformation': [10.1, 10.1, 0.622, 10.1, 19.5, 19.5, 1.05, 19.5, 15.1, 15.1, 4.7, 15.1],
+                'Transport au marché': [0.0467, 0.467, 0.933, 0.7, 0.0959, 0.959, 1.92, 1.44, 0.0865, 0.865, 1.73, 1.3]
+            }
+            
+            df = pd.DataFrame(data)
+            
+            # Función para crear el gráfico de barras apiladas horizontal con categorías agrupadas
+            def create_stacked_bar_chart(df, selected_categories, selected_locations):
+                fig = go.Figure()
+            
+                # Definir colores para cada tipo de impacto
+                colors = {
+                    'Production': 'blue',
+                    'Transport à l\'usine': 'orange',
+                    'Transformation': 'green',
+                    'Transport au marché': 'red'
+                }
+            
+                # Filtrar las categorías y localidades seleccionadas
+                df_filtered = df[(df['Category of Impact'].isin(selected_categories)) & (df['VC'].isin(selected_locations))]
+            
+                categories = df_filtered['Category of Impact'].unique()
+                locations = df_filtered['VC'].unique()
+            
+                # Crear etiquetas en el eje Y con categorías y localidades combinadas
+                y_labels = []
+                for category in categories:
+                    for location in locations:
+                        y_labels.append(f"{category} - {location}")
+            
+                # Añadir barras apiladas para cada categoría y localidad
+                for column in ['Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']:
+                    values = []
+                    for category in categories:
+                        for location in locations:
+                            value = df_filtered[(df_filtered['Category of Impact'] == category) & (df_filtered['VC'] == location)][column].values
+                            values.append(value[0] if len(value) > 0 else 0)
+                    fig.add_trace(go.Bar(
+                        y=y_labels,
+                        x=values,
+                        name=column,
+                        orientation='h',
+                        marker_color=colors[column]
+                    ))
+            
+                # Agregar anotaciones (etiquetas) al lado de las barras más grandes
+                for i, y_label in enumerate(y_labels):
+                    total_value = sum([df_filtered[(df_filtered['Category of Impact'] == y_label.split(" - ")[0]) & (df_filtered['VC'] == y_label.split(" - ")[1])][col].values[0] for col in colors.keys()])
+                    location = y_label.split(" - ")[1]
+                    fig.add_annotation(
+                        x=total_value + 0.5,  # Coloca la etiqueta al lado de la barra
+                        y=y_label,
+                        text=location,
+                        showarrow=False,
+                        font=dict(size=12),
+                        xanchor="left",
+                        yanchor="middle"
+                    )
+            
+                # Mejora la disposición de las etiquetas en el eje Y
+                fig.update_layout(
+                    barmode='stack',
+                    title="Impacts environnementaux classés par catégorie et par lieu",
+                    xaxis=dict(title="Impacto"),
+                    yaxis=dict(
+                        title="Categoría de Impacto",
+                        tickmode="array",
+                        tickvals=[i * len(locations) + len(locations) / 2 - 0.5 for i in range(len(categories))],
+                        ticktext=categories
+                    ),
+                    showlegend=True,
+                    height=1500  # Ajustar según sea necesario
+                )
+            
+                return fig, df_filtered
+            
+            # Streamlit main function
+            def main():
+                st.title('Visualisation des impacts environnementaux de la production de 1 ton de fufu dans quatre localités')
+                df = load_data()
+            
+                st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
+            
+                # Obtener listas de todas las categorías y localidades
+                all_categories = df['Category of Impact'].unique().tolist()
+                all_locations = df['VC'].unique().tolist()
+            
+                # Crear selectores multiselect para categorías de impacto y localidades
+                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
+                selected_locations = st.multiselect('Sélectionner les lieux', all_locations, default=all_locations)
+            
+                # Crear la gráfica con las categorías y localidades seleccionadas
+                fig, df_filtered = create_stacked_bar_chart(df, selected_categories, selected_locations)
+                st.plotly_chart(fig, use_container_width=True)
+            
+                # Reorganizar las columnas para que "Category of Impact" sea la primera
+                columns_order = ['Category of Impact', 'VC', 'Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']
+                df_filtered = df_filtered[columns_order]
+            
+                # Mostrar la tabla con los datos filtrados
+                st.subheader("Données normalisées et désagrégées par catégorie d'impact et par lieu.")
+                
+
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
 st.caption('**Authors: Alejandro Taborda, (latabordaa@unal.edu.co), Thierry Tran**')
