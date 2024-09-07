@@ -436,8 +436,8 @@ with PR:
 
 with EN:
     if DD == "**EndPoint single score (pt)**":
- 
-            
+             
+                        
             # Datos estructurados
             data = {
                 'Category of Impact': ['Ecosystems', 'Ecosystems', 'Ecosystems', 'Ecosystems',
@@ -447,19 +447,15 @@ with EN:
                        'VC. Kinshasa', 'VC. Madimba', 'VC. Matadi', 'VC. Plateau',
                        'VC. Kinshasa', 'VC. Madimba', 'VC. Matadi', 'VC. Plateau'],
                 'Total': [14.9, 13, 3.97, 14, 28.2, 24.4, 6.8, 26.2, 20.9, 17.6, 7.74, 19.1],
-                'Production': [2.8, 2.31, 2.02, 2.8, 4.44, 3.49, 3.06, 4.44, 3.76, 1.18, 0.607, 1.9],
-                'Transport à l\'usine': [2.03, 0.203, 0.399, 0.406, 4.17, 0.417, 0.769, 0.834, 3.76, 0.376, 0.707, 0.752],
-                'Transformation': [10.1, 10.1, 0.622, 10.1, 19.5, 19.5, 1.05, 19.5, 15.1, 15.1, 4.7, 15.1],
-                'Transport au marché': [0.0467, 0.467, 0.933, 0.7, 0.0959, 0.959, 1.92, 1.44, 0.0865, 0.865, 1.73, 1.3]
             }
             
             df = pd.DataFrame(data)
             
-            # Función para crear el gráfico de barras agrupadas en horizontal con etiquetas
+            # Función para crear el gráfico de barras apiladas por categoría
             def create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations):
                 fig = go.Figure()
             
-                # Definir colores para cada ubicación (como se solicitó)
+                # Definir colores para cada ubicación
                 colors = {
                     'VC. Kinshasa': 'blue',
                     'VC. Madimba': 'yellow',
@@ -467,38 +463,30 @@ with EN:
                     'VC. Plateau': 'red'
                 }
             
-                # Filtrar las categorías y localidades seleccionadas
-                df_filtered = df[(df['Category of Impact'].isin(selected_categories)) & (df['VC'].isin(selected_locations))]
-            
-                # Añadir barras para cada ubicación solo una vez
-                added_legend = set()
+                # Añadir barras para cada ubicación por categoría
                 for location in selected_locations:
                     for category in selected_categories:
-                        df_location = df_filtered[df_filtered['VC'] == location]
-                        show_legend = location not in added_legend  # Mostrar leyenda solo una vez
+                        df_location = df[(df['VC'] == location) & (df['Category of Impact'] == category)]
                         fig.add_trace(go.Bar(
-                            y=[category],
-                            x=df_location[df_location['Category of Impact'] == category]['Total'],
-                            name=location if show_legend else None,  # Agregar leyenda solo si no se ha añadido
-                            orientation='h',
+                            x=[category],
+                            y=df_location['Total'],
+                            name=location,
                             marker_color=colors[location],
-                            text=df_location[df_location['Category of Impact'] == category]['Total'],
+                            text=df_location['Total'],
                             textposition='outside',
                             textfont=dict(size=14),  # Tamaño de las etiquetas más grande
-                            showlegend=show_legend
+                            showlegend=location not in fig.data  # Mostrar leyenda solo una vez
                         ))
-                        added_legend.add(location)  # Marcar que ya se añadió la leyenda
             
                 # Configurar el diseño del gráfico
                 fig.update_layout(
-                    barmode='group',
+                    barmode='relative',  # Apila barras relacionadas con la misma categoría
                     title="Impactos ambientales clasificados por categoría y lugar",
-                    xaxis=dict(title="Puntuación total del impacto"),
-                    yaxis=dict(title="Categoría de Impacto"),
+                    xaxis=dict(title="Categoría de Impacto"),
+                    yaxis=dict(title="Puntuación total del impacto"),
                     height=600,
                     width=800,
-                    showlegend=True,
-                    bargap=0.1,  # Elimina el espacio entre las barras
+                    showlegend=True
                 )
             
                 return fig
@@ -524,7 +512,7 @@ with EN:
                 st.dataframe(df)
             
             if __name__ == "__main__":
-                main()           
+                main()     
 
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
