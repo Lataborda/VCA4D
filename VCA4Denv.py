@@ -438,7 +438,7 @@ with EN:
     if DD == "**EndPoint single score (pt)**":
       
 
-            # Cargar los datos desde un diccionario (que provienen de la tabla extraída de la imagen)
+            # Datos extraídos de la imagen estructurados en un diccionario
             data = {
                 'Category of Impact': ['Ecosystems', 'Ecosystems', 'Ecosystems', 'Ecosystems',
                                        'Human Health', 'Human Health', 'Human Health', 'Human Health',
@@ -525,10 +525,10 @@ with EN:
             
                 return fig, df_filtered
             
-            # Streamlit main function
+            # Función principal para ejecutar la aplicación Streamlit
             def main():
                 st.title('Visualisation des impacts environnementaux de la production de 1 ton de fufu dans quatre localités')
-                df = load_data()
+                # Los datos ya están cargados en df
             
                 st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
             
@@ -551,9 +551,9 @@ with EN:
                 # Mostrar la tabla con los datos filtrados
                 st.subheader("Données normalisées et désagrégées par catégorie d'impact et par lieu.")
                 st.dataframe(df_filtered)
-
+            
             if __name__ == "__main__":
-                main()                
+                main()              
 
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
