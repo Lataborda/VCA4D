@@ -437,8 +437,8 @@ with PR:
 with EN:
     if DD == "**EndPoint single score (pt)**":
  
-                 
-            # Datos extraídos de la imagen estructurados en un diccionario
+            
+            # Datos estructurados
             data = {
                 'Category of Impact': ['Ecosystems', 'Ecosystems', 'Ecosystems', 'Ecosystems',
                                        'Human Health', 'Human Health', 'Human Health', 'Human Health',
@@ -459,10 +459,10 @@ with EN:
             def create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations):
                 fig = go.Figure()
             
-                # Definir colores para cada ubicación (similar a la imagen de referencia)
+                # Definir colores para cada ubicación (como se solicitó)
                 colors = {
                     'VC. Kinshasa': 'blue',
-                    'VC. Madimba': 'orange',
+                    'VC. Madimba': 'yellow',
                     'VC. Matadi': 'green',
                     'VC. Plateau': 'red'
                 }
@@ -470,19 +470,24 @@ with EN:
                 # Filtrar las categorías y localidades seleccionadas
                 df_filtered = df[(df['Category of Impact'].isin(selected_categories)) & (df['VC'].isin(selected_locations))]
             
-                # Crear barras para cada ubicación
+                # Añadir barras para cada ubicación solo una vez
+                added_legend = set()
                 for location in selected_locations:
                     for category in selected_categories:
                         df_location = df_filtered[df_filtered['VC'] == location]
+                        show_legend = location not in added_legend  # Mostrar leyenda solo una vez
                         fig.add_trace(go.Bar(
                             y=[category],
                             x=df_location[df_location['Category of Impact'] == category]['Total'],
-                            name=location,
+                            name=location if show_legend else None,  # Agregar leyenda solo si no se ha añadido
                             orientation='h',
                             marker_color=colors[location],
                             text=df_location[df_location['Category of Impact'] == category]['Total'],
-                            textposition='auto'
+                            textposition='outside',
+                            textfont=dict(size=14),  # Tamaño de las etiquetas más grande
+                            showlegend=show_legend
                         ))
+                        added_legend.add(location)  # Marcar que ya se añadió la leyenda
             
                 # Configurar el diseño del gráfico
                 fig.update_layout(
@@ -492,7 +497,8 @@ with EN:
                     yaxis=dict(title="Categoría de Impacto"),
                     height=600,
                     width=800,
-                    showlegend=True
+                    showlegend=True,
+                    bargap=0,  # Elimina el espacio entre las barras
                 )
             
                 return fig
@@ -518,7 +524,7 @@ with EN:
                 st.dataframe(df)
             
             if __name__ == "__main__":
-                main()            
+                main()           
 
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
