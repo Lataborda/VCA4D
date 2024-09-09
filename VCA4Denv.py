@@ -521,7 +521,7 @@ with EN:
                 st.plotly_chart(fig, use_container_width=True)
             
                 # Mostrar la tabla con los datos filtrados
-                st.subheader(f"Dommages end-point (Pt) de chaque étape de la chaîne de valeur Production de manioc et transformation en fufu (1 ton) en DRC:({selected_column})")
+                st.subheader(Données d'impact au point final (Pt) à chaque étape de la chaîne de valeur du fufu (1 tonne) en RDC)
                 st.dataframe(df)
             
             if __name__ == "__main__":
