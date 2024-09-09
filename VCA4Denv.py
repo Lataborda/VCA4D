@@ -462,7 +462,7 @@ with EN:
                 # Definir colores para cada ubicación (como se solicitó)
                 colors = {
                     'VC. Kinshasa': 'blue',
-                    'VC. Madimba': 'yellow',
+                    'VC. Madimba': 'orange',
                     'VC. Matadi': 'green',
                     'VC. Plateau': 'red'
                 }
@@ -486,9 +486,9 @@ with EN:
                 # Configurar el diseño del gráfico
                 fig.update_layout(
                     barmode='group',
-                    title=f"Impactos ambientales clasificados por categoría y lugar ({selected_column})",
-                    xaxis=dict(title=f"Puntuación de {selected_column}"),
-                    yaxis=dict(title="Categoría de Impacto"),
+                    title=f"Impacts sur l'environnement classés par catégorie et par lieu: ({selected_column})",
+                    xaxis=dict(title=f"Points de {selected_column}"),
+                    yaxis=dict(title="Catégorie d'impact"),
                     height=600,
                     width=800,
                     showlegend=True,
@@ -500,28 +500,28 @@ with EN:
             
             # Función principal para ejecutar la aplicación Streamlit
             def main():
-                st.title('Visualización de los impactos ambientales de la producción de 1 ton de fufu en cuatro localidades')
+                st.title('Dommages end-point de la chaîne de valeur Production de manioc et transformation en fufu (1ton) en DRC')
             
                 # Lista de columnas que se pueden seleccionar para el gráfico
                 column_options = ['Total', 'Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']
                 
                 # Crear un selectbox para seleccionar la columna a graficar
-                selected_column = st.selectbox("Seleccionar columna de impacto a visualizar", column_options)
+                selected_column = st.selectbox("Sélectionner la colonne d'impact à afficher", column_options)
             
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of Impact'].unique().tolist()
                 all_locations = df['VC'].unique().tolist()
             
                 # Crear selectores multiselect para categorías de impacto y localidades
-                selected_categories = st.multiselect("Seleccionar categorías de impacto", all_categories, default=all_categories)
-                selected_locations = st.multiselect('Seleccionar localidades', all_locations, default=all_locations)
+                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
+                selected_locations = st.multiselect('Sélectionner les localités', all_locations, default=all_locations)
             
                 # Crear la gráfica con las categorías y localidades seleccionadas
                 fig = create_grouped_bar_chart_with_labels(df, selected_column, selected_categories, selected_locations)
                 st.plotly_chart(fig, use_container_width=True)
             
                 # Mostrar la tabla con los datos filtrados
-                st.subheader(f"Datos normalizados y desagregados por categoría de impacto y lugar ({selected_column})")
+                st.subheader(f"Dommages end-point (Pt) de chaque étape de la chaîne de valeur Production de manioc et transformation en fufu (1 ton) en DRC:({selected_column})")
                 st.dataframe(df)
             
             if __name__ == "__main__":
