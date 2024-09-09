@@ -486,7 +486,7 @@ with EN:
                 # Configurar el diseño del gráfico
                 fig.update_layout(
                     barmode='group',
-                    title="Impactos ambientales clasificados por categoría y lugar",
+                    title="Impacts sur l'environnement classés par catégorie et par lieu",
                     xaxis=dict(title="Endpoint single score (Pt)"),
                     yaxis=dict(title="Category de Impact"),
                     height=600,
@@ -500,15 +500,15 @@ with EN:
             
             # Función principal para ejecutar la aplicación Streamlit
             def main():
-                st.title('Visualización de los impactos ambientales de la producción de 1 ton de fufu en cuatro localidades')
+                st.title('Dommages end-point de la chaîne de valeur Production de manioc et transformation en fufu (1ton) en DRC')
             
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of Impact'].unique().tolist()
                 all_locations = df['VC'].unique().tolist()
             
                 # Crear selectores multiselect para categorías de impacto y localidades
-                selected_categories = st.multiselect("Seleccionar categorías de impacto", all_categories, default=all_categories)
-                selected_locations = st.multiselect('Seleccionar localidades', all_locations, default=all_locations)
+                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
+                selected_locations = st.multiselect('Sélectionner les localités', all_locations, default=all_locations)
             
                 # Crear la gráfica con las categorías y localidades seleccionadas
                 fig = create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations)
