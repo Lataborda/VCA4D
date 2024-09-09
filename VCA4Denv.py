@@ -436,8 +436,8 @@ with PR:
 
 with EN:
     if DD == "**EndPoint single score (pt)**":
-             
-                        
+
+            
             # Datos estructurados
             data = {
                 'Category of Impact': ['Ecosystems', 'Ecosystems', 'Ecosystems', 'Ecosystems',
@@ -456,13 +456,13 @@ with EN:
             df = pd.DataFrame(data)
             
             # Función para crear el gráfico de barras agrupadas en horizontal con etiquetas
-            def create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations):
+            def create_grouped_bar_chart_with_labels(df, selected_column, selected_categories, selected_locations):
                 fig = go.Figure()
             
                 # Definir colores para cada ubicación (como se solicitó)
                 colors = {
                     'VC. Kinshasa': 'blue',
-                    'VC. Madimba': 'orange',
+                    'VC. Madimba': 'yellow',
                     'VC. Matadi': 'green',
                     'VC. Plateau': 'red'
                 }
@@ -474,11 +474,11 @@ with EN:
                 for location in selected_locations:
                     fig.add_trace(go.Bar(
                         y=df_filtered[df_filtered['VC'] == location]['Category of Impact'],
-                        x=df_filtered[df_filtered['VC'] == location]['Total'],
+                        x=df_filtered[df_filtered['VC'] == location][selected_column],
                         name=location,
                         orientation='h',
                         marker_color=colors[location],
-                        text=df_filtered[df_filtered['VC'] == location]['Total'],
+                        text=df_filtered[df_filtered['VC'] == location][selected_column],
                         textposition='auto',
                         textfont=dict(size=14)  # Tamaño de las etiquetas más grande
                     ))
@@ -486,9 +486,9 @@ with EN:
                 # Configurar el diseño del gráfico
                 fig.update_layout(
                     barmode='group',
-                    title="Impacts sur l'environnement classés par catégorie et par lieu",
-                    xaxis=dict(title="Endpoint single score (Pt)"),
-                    yaxis=dict(title="Category de Impact"),
+                    title=f"Impactos ambientales clasificados por categoría y lugar ({selected_column})",
+                    xaxis=dict(title=f"Puntuación de {selected_column}"),
+                    yaxis=dict(title="Categoría de Impacto"),
                     height=600,
                     width=800,
                     showlegend=True,
@@ -500,26 +500,32 @@ with EN:
             
             # Función principal para ejecutar la aplicación Streamlit
             def main():
-                st.title('Dommages end-point de la chaîne de valeur Production de manioc et transformation en fufu (1ton) en DRC')
+                st.title('Visualización de los impactos ambientales de la producción de 1 ton de fufu en cuatro localidades')
+            
+                # Lista de columnas que se pueden seleccionar para el gráfico
+                column_options = ['Total', 'Production', 'Transport à l\'usine', 'Transformation', 'Transport au marché']
+                
+                # Crear un selectbox para seleccionar la columna a graficar
+                selected_column = st.selectbox("Seleccionar columna de impacto a visualizar", column_options)
             
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of Impact'].unique().tolist()
                 all_locations = df['VC'].unique().tolist()
             
                 # Crear selectores multiselect para categorías de impacto y localidades
-                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
-                selected_locations = st.multiselect('Sélectionner les localités', all_locations, default=all_locations)
+                selected_categories = st.multiselect("Seleccionar categorías de impacto", all_categories, default=all_categories)
+                selected_locations = st.multiselect('Seleccionar localidades', all_locations, default=all_locations)
             
                 # Crear la gráfica con las categorías y localidades seleccionadas
-                fig = create_grouped_bar_chart_with_labels(df, selected_categories, selected_locations)
+                fig = create_grouped_bar_chart_with_labels(df, selected_column, selected_categories, selected_locations)
                 st.plotly_chart(fig, use_container_width=True)
             
                 # Mostrar la tabla con los datos filtrados
-                st.subheader("Datos normalizados y desagregados por categoría de impacto y lugar.")
+                st.subheader(f"Datos normalizados y desagregados por categoría de impacto y lugar ({selected_column})")
                 st.dataframe(df)
             
             if __name__ == "__main__":
-                main()  
+                main()
 
 
 st.markdown('*Copyright (C) 2024 CIRAD, AGRINATURA*')
