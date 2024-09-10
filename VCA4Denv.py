@@ -289,9 +289,9 @@ with TR:
                 fig.update_layout(
                     barmode='stack',
                     title="Impacts environnementaux classés par catégorie et par lieu",
-                    xaxis=dict(title="Impacto"),
+                    xaxis=dict(title="Impact"),
                     yaxis=dict(
-                        title="Categoría de Impacto",
+                        title="Catégorie d'impact",
                         tickmode="array",
                         tickvals=[i * len(locations) + len(locations) / 2 - 0.5 for i in range(len(categories))],
                         ticktext=categories
