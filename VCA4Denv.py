@@ -102,7 +102,7 @@ with IN:
 with ES:
     if DD == "**Comparaison des scénarios**":
             
-            # Data from the image you provided
+            # Datos proporcionados
             data = {
                 "Category": ["Climate change", "Ozone depletion", "Terrestrial acidification", "Freshwater eutrophication", "Marine eutrophication", 
                              "Human toxicity", "Photochemical oxidant formation", "Particulate matter formation", "Terrestrial ecotoxicity", 
@@ -132,8 +132,8 @@ with ES:
             df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
             
             # Configuración de Streamlit
-            st.title("Analyse comparatif des différents systèmes de transformation de yuca en DRC")
-            st.write("Impacts environnementaux potentiels de la production d'une tonne de chaque produit transformé en les quatre scénarios.")
+            st.title("Analyse comparative des différents systèmes de transformation de yuca en RDC")
+            st.write("Impacts environnementaux potentiels de la production d'une tonne de chaque produit transformé dans les quatre scénarios.")
             
             # Mostrar el DataFrame original y normalizado
             st.subheader("Données de sortie SIMAPRO")
@@ -143,12 +143,23 @@ with ES:
             
             st.dataframe(df_normalized)
             
-            # Selector múltiple para las columnas
-            options = st.multiselect("Sélectionnez les lieux à afficher:", ["S1_farine_panifiable", "S2_fufu_amelioree", "S3_Microcosssettes", "S4_Fufu_conventionnel"], default=["S1_farine_panifiable","S2_fufu_amelioree", "S3_Microcosssettes", "S4_Fufu_conventionnel"])
+            # Selector múltiple para columnas (sistemas)
+            options_systems = st.multiselect(
+                "Sélectionnez les systèmes à afficher :",
+                ["S1_farine_panifiable", "S2_fufu_amelioree", "S3_Microcosssettes", "S4_Fufu_conventionnel"],
+                default=["S1_farine_panifiable", "S2_fufu_amelioree", "S3_Microcosssettes", "S4_Fufu_conventionnel"]
+            )
             
-            # Filtrar el dataframe para incluir solo las columnas seleccionadas
-            if options:
-                filtered_data = df_normalized[options]
+            # Selector múltiple para categorías de impacto
+            options_categories = st.multiselect(
+                "Sélectionnez les catégories d'impact à afficher :",
+                df_normalized.index.tolist(),
+                default=df_normalized.index.tolist()
+            )
+            
+            # Filtrar el DataFrame según las selecciones
+            if options_systems and options_categories:
+                filtered_data = df_normalized.loc[options_categories, options_systems]
             
                 # Crear y mostrar el gráfico
                 fig, ax = plt.subplots(figsize=(10, 8))
@@ -158,7 +169,7 @@ with ES:
                 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
                 st.pyplot(fig)
             else:
-                st.write("No locations selected. Please select at least one location.")
+                st.write("Veuillez sélectionner au moins un système et une catégorie d'impact.")
 
 with VC:
         
