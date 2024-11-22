@@ -300,7 +300,7 @@ with TR:
                         y=y_label,
                         text=location,
                         showarrow=False,
-                        font=dict(size=14),
+                        font=dict(size=18),
                         xanchor="left",
                         yanchor="middle"
                     )
