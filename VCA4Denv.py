@@ -175,7 +175,7 @@ with VC:
         
     if DD == "**Cassava Value Chain (agrégée)**":
 
-            # Definir los datos en un diccionario
+            # Datos proporcionados
             data = {
                 "Category": ["Climate change", "Ozone depletion", "Terrestrial acidification", "Freshwater eutrophication", "Marine eutrophication", 
                              "Human toxicity", "Photochemical oxidant formation", "Particulate matter formation", "Terrestrial ecotoxicity", 
@@ -190,49 +190,58 @@ with VC:
                 "VC_Matadi": [213, 4.3e-5, 0.715, 2.46, 0.0281, 16.7, 1.42, 0.305, 0.0303, 0.122, 0.269, 14.6, 4.57, 3.42, 0.0821, 4.86, 5.17, 83.6],
                 "VC_Plateau_Bateke": [568, 6.89e-5, 3.14, 3.29, 0.155, 66.8, 4.53, 1.67, 0.09, 0.312, 0.652, 25, 78.1, 19.7, 0.139, 5.53, 47, 157]
             }
-
+            
             # Crear DataFrame
             df = pd.DataFrame(data)
-
+            
             # Combinar categoría con unidad
             df['Category'] = df['Category'] + " (" + df['Unit'] + ")"
-
+            
             # Eliminar la columna 'Unit' ya que ya está combinada
             df.drop('Unit', axis=1, inplace=True)
-
+            
             # Normalizar los valores al máximo de cada fila
             df_normalized = df.set_index("Category")
             df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
-
+            
             # Configuración de Streamlit
             st.title("Analyse comparative de la chaîne de valeur (agrégée)")
             st.write("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
-
-
-
+            
             # Mostrar el DataFrame original y normalizado
             st.subheader("Données de sortie SIMAPRO")
             st.dataframe(df)
             st.subheader("Données normalisées")
             st.write("Pour chaque catégorie d’impact, l’unité de transformation avec l’impact le plus élevé est représentée avec un indice 100 (au lieu des unités d’origine), pour faciliter les comparaisons.")
-
             st.dataframe(df_normalized)
-
-            # Selector múltiple para las columnas
-            options = st.multiselect("Sélectionnez les lieux à afficher:", ["VC_Kinshasa", "VC_Madimba", "VC_Matadi", "VC_Plateau_Bateke"], default=["VC_Kinshasa","VC_Madimba", "VC_Matadi", "VC_Plateau_Bateke"])
-            # Filtrar el dataframe para incluir solo las columnas seleccionadas
-            if options:
-                filtered_data = df_normalized[options]
-
+            
+            # Selector múltiple para columnas (cadenas de valor)
+            options_systems = st.multiselect(
+                "Sélectionnez les chaînes de valeur à afficher :",
+                ["VC_Kinshasa", "VC_Madimba", "VC_Matadi", "VC_Plateau_Bateke"],
+                default=["VC_Kinshasa", "VC_Madimba", "VC_Matadi", "VC_Plateau_Bateke"]
+            )
+            
+            # Selector múltiple para categorías de impacto
+            options_categories = st.multiselect(
+                "Sélectionnez les catégories d'impact à afficher :",
+                df_normalized.index.tolist(),
+                default=df_normalized.index.tolist()
+            )
+            
+            # Filtrar el DataFrame según las selecciones
+            if options_systems and options_categories:
+                filtered_data = df_normalized.loc[options_categories, options_systems]
+            
                 # Crear y mostrar el gráfico
                 fig, ax = plt.subplots(figsize=(10, 8))
                 filtered_data.plot(kind='barh', ax=ax, width=0.7)
                 ax.set_xlabel("Percentage of Max Value (%)")
-                ax.set_title("Impact Assessment by Category and Location")
+                ax.set_title("Impact Assessment by Category and Value Chain")
                 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
                 st.pyplot(fig)
             else:
-                st.write("No locations selected. Please select at least one location.")
+                st.write("Veuillez sélectionner au moins une chaîne de valeur et une catégorie d'impact.")
 
 with TR:
     if DD == "**Cassava Value Chain (désagrégée)**":
