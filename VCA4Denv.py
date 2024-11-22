@@ -185,10 +185,10 @@ with VC:
                          "kg 1,4-DB eq", "kg NMVOC", "kg PM10 eq", "kg 1,4-DB eq", 
                          "kg 1,4-DB eq", "kg 1,4-DB eq", "kBq U235 eq", "m2a", "m2a", 
                          "m2", "m3", "kg Fe eq", "kg oil eq"],
-                "VC_Kinshasa": [613, 7.69e-5, 3.37, 3.29, 0.167, 75.5, 4.86, 1.78, 0.106, 0.341, 0.782, 27.9, 78.6, 21.7, 0.156, 5.66, 48.8, 173],
-                "VC_Madimba": [529, 6.27e-5, 2.92, 3.28, 0.144, 60.3, 4.2, 1.55, 0.0795, 0.29, 0.573, 22.8, 74.3, 18, 0.126, 5.43, 44.2, 144],
-                "VC_Matadi": [213, 4.3e-5, 0.715, 2.46, 0.0281, 16.7, 1.42, 0.305, 0.0303, 0.122, 0.269, 14.6, 4.57, 3.42, 0.0821, 4.86, 5.17, 83.6],
-                "VC_Plateau_Bateke": [568, 6.89e-5, 3.14, 3.29, 0.155, 66.8, 4.53, 1.67, 0.09, 0.312, 0.652, 25, 78.1, 19.7, 0.139, 5.53, 47, 157]
+                "sVC_Kinshasa": [613, 7.69e-5, 3.37, 3.29, 0.167, 75.5, 4.86, 1.78, 0.106, 0.341, 0.782, 27.9, 78.6, 21.7, 0.156, 5.66, 48.8, 173],
+                "sVC_Madimba": [529, 6.27e-5, 2.92, 3.28, 0.144, 60.3, 4.2, 1.55, 0.0795, 0.29, 0.573, 22.8, 74.3, 18, 0.126, 5.43, 44.2, 144],
+                "sVC_Matadi": [213, 4.3e-5, 0.715, 2.46, 0.0281, 16.7, 1.42, 0.305, 0.0303, 0.122, 0.269, 14.6, 4.57, 3.42, 0.0821, 4.86, 5.17, 83.6],
+                "sVC_Plateau_Bateke": [568, 6.89e-5, 3.14, 3.29, 0.155, 66.8, 4.53, 1.67, 0.09, 0.312, 0.652, 25, 78.1, 19.7, 0.139, 5.53, 47, 157]
             }
             
             # Crear DataFrame
@@ -205,7 +205,7 @@ with VC:
             df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
             
             # Configuración de Streamlit
-            st.title("Analyse comparative de la chaîne de valeur (agrégée)")
+            st.title("Analyse comparative de la sous chaîne de valeur (agrégée)")
             st.write("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
             
             # Mostrar el DataFrame original y normalizado
@@ -217,9 +217,9 @@ with VC:
             
             # Selector múltiple para columnas (cadenas de valor)
             options_systems = st.multiselect(
-                "Sélectionnez les chaînes de valeur à afficher :",
-                ["VC_Kinshasa", "VC_Madimba", "VC_Matadi", "VC_Plateau_Bateke"],
-                default=["VC_Kinshasa", "VC_Madimba", "VC_Matadi", "VC_Plateau_Bateke"]
+                "Sélectionnez les sous chaînes de valeur à afficher :",
+                ["sVC_Kinshasa", "sVC_Madimba", "sVC_Matadi", "sVC_Plateau_Bateke"],
+                default=["sVC_Kinshasa", "sVC_Madimba", "sVC_Matadi", "sVC_Plateau_Bateke"]
             )
             
             # Selector múltiple para categorías de impacto
