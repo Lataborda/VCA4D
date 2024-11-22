@@ -355,7 +355,6 @@ with TR:
 with PR:
     if DD == "**Production de racines de manioc**":
 
-
             # Definir los datos en un diccionario
             data = {
                 "Category": [
@@ -413,37 +412,42 @@ with PR:
                     0.871, 2.41
                 ]
             }
-
+            
             # Crear DataFrame
             df = pd.DataFrame(data)
-
+            
             # Combinar categoría con unidad
             df['Category'] = df['Category'] + " (" + df['Unit'] + ")"
-
+            
             # Eliminar la columna 'Unit' ya que ya está combinada
             df.drop('Unit', axis=1, inplace=True)
-
+            
             # Normalizar los valores al máximo de cada fila
             df_normalized = df.set_index("Category")
             df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
-
+            
             # Configuración de Streamlit
             st.title("Analyse Comparative de l'Impact Environnemental Normalisé")
             st.write("Visualisation des impacts environnementaux normalisés pour diverses localités.")
-
-            # Mostrar el DataFrame original y normalizado
-            st.subheader("Données Originales")
-            st.dataframe(df)
-            st.subheader("Données Normalisées")
-            st.dataframe(df_normalized)
-
-            # Selector múltiple para las columnas
-            options = st.multiselect("Sélectionnez les localités à afficher:", list(df_normalized.columns), default=list(df_normalized.columns))
-
-            # Filtrar el dataframe para incluir solo las columnas seleccionadas
-            if options:
-                filtered_data = df_normalized[options]
-
+            
+            # Selector múltiple para columnas (localidades)
+            options_locations = st.multiselect(
+                "Sélectionnez les localités à afficher :",
+                list(df_normalized.columns),
+                default=list(df_normalized.columns)
+            )
+            
+            # Selector múltiple para categorías de impacto
+            options_categories = st.multiselect(
+                "Sélectionnez les catégories d'impact à afficher :",
+                df_normalized.index.tolist(),
+                default=df_normalized.index.tolist()
+            )
+            
+            # Filtrar el DataFrame según las selecciones
+            if options_locations and options_categories:
+                filtered_data = df_normalized.loc[options_categories, options_locations]
+            
                 # Crear y mostrar el gráfico
                 fig, ax = plt.subplots(figsize=(10, 8))
                 filtered_data.plot(kind='barh', ax=ax, width=0.9)
@@ -452,8 +456,8 @@ with PR:
                 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
                 st.pyplot(fig)
             else:
-                st.write("Aucune localité sélectionnée. Veuillez en sélectionner au moins une.")
-
+                st.write("Veuillez sélectionner au moins une localité et une catégorie d'impact.")
+                
 with EN:
     if DD == "**EndPoint single score (pt)**":
 
