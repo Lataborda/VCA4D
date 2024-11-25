@@ -247,7 +247,7 @@ with TR:
     if DD == "**Cassava Value Chain (désagrégée)**":
 
 
-                       # Función para cargar los datos desde un archivo CSV con delimitador ','
+            # Función para cargar los datos desde un archivo CSV con delimitador ','
             def load_data():
                 df = pd.read_csv('Data/grv2c.csv', delimiter=',', header=0)
                 return df
@@ -298,8 +298,8 @@ with TR:
                     xaxis=dict(title="Impact"),
                     yaxis=dict(
                         title="Catégorie d'impact",
-                        tickfont=dict(size=14),
-                        titlefont=dict(size=16),
+                        tickfont=dict(size=14),  # Aumentar el tamaño de las etiquetas
+                        titlefont=dict(size=16),  # Aumentar el tamaño del título
                         tickangle=-90  # Hacer etiquetas verticales
                     ),
                     showlegend=True,
