@@ -246,16 +246,15 @@ with VC:
 with TR:
     if DD == "**Cassava Value Chain (désagrégée)**":
 
-
             # Función para cargar los datos desde un archivo CSV con delimitador ','
             def load_data():
                 df = pd.read_csv('Data/grv2c.csv', delimiter=',', header=0)
                 return df
-            
+
             # Crear el gráfico de barras apiladas horizontal con categorías agrupadas
             def create_stacked_bar_chart(df, selected_categories, selected_locations):
                 fig = go.Figure()
-            
+
                 # Definir colores para cada tipo de impacto
                 colors = {
                     'Production': 'blue',
@@ -263,19 +262,19 @@ with TR:
                     'transformation': 'green',
                     'Transport au marché': 'red'
                 }
-            
+
                 # Filtrar las categorías y localidades seleccionadas
                 df_filtered = df[(df['Category of impact'].isin(selected_categories)) & (df['Location'].isin(selected_locations))]
-            
+
                 categories = df_filtered['Category of impact'].unique()
                 locations = df_filtered['Location'].unique()
-            
+
                 # Crear etiquetas en el eje Y con categorías y localidades combinadas
                 y_labels = []
                 for category in categories:
                     for location in locations:
                         y_labels.append(f"{category} - {location}")
-            
+
                 # Añadir barras apiladas para cada categoría y localidad
                 for column in ['Production', 'Transport à l\'usine', 'transformation', 'Transport au marché']:
                     values = []
@@ -290,58 +289,65 @@ with TR:
                         orientation='h',
                         marker_color=colors[column]
                     ))
-            
-                # Configurar las etiquetas del eje Y y el diseño general
+
+                # Agregar anotaciones (etiquetas) al lado de las barras más grandes
+                for i, y_label in enumerate(y_labels):
+                    total_value = sum([df_filtered[(df_filtered['Category of impact'] == y_label.split(" - ")[0]) & (df_filtered['Location'] == y_label.split(" - ")[1])][col].values[0] for col in colors.keys()])
+                    location = y_label.split(" - ")[1]
+                    fig.add_annotation(
+                        x=total_value + 0.5,  # Coloca la etiqueta al lado de la barra
+                        y=y_label,
+                        text=location,
+                        showarrow=False,
+                        font=dict(size=18),
+                        xanchor="left",
+                        yanchor="middle"
+                    )
+
+                # Mejora la disposición de las etiquetas en el eje Y
                 fig.update_layout(
                     barmode='stack',
                     title="Impacts environnementaux classés par catégorie et par lieu",
                     xaxis=dict(title="Impact"),
                     yaxis=dict(
                         title="Catégorie d'impact",
-                        tickfont=dict(size=14),  # Aumentar el tamaño de las etiquetas
-                        titlefont=dict(size=16),  # Aumentar el tamaño del título
-                        tickangle=-90  # Hacer etiquetas verticales
+                        tickmode="array",
+                        tickvals=[i * len(locations) + len(locations) / 2 - 0.5 for i in range(len(categories))],
+                        ticktext=categories
                     ),
                     showlegend=True,
-                    height=800  # Ajustar altura según sea necesario
+                    height=1500  # Ajustar según sea necesario
                 )
-            
+
                 return fig, df_filtered
-            
+
             # Función principal para ejecutar la aplicación Streamlit
             def main():
                 st.title('Visualisation des impacts environnementaux de la production de 1 ton de fufu dans quatre localités')
                 df = load_data()
-            
+
                 st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
-            
+
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of impact'].unique().tolist()
                 all_locations = df['Location'].unique().tolist()
-            
-                # Categorías por defecto
-                default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", 
-                                      "Natural land transformation", "Water depletion"]
-            
+
                 # Crear selectores multiselect para categorías de impacto y localidades
-                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=default_categories)
+                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
                 selected_locations = st.multiselect('Sélectionner les lieux', all_locations, default=all_locations)
-            
+
                 # Crear la gráfica con las categorías y localidades seleccionadas
                 fig, df_filtered = create_stacked_bar_chart(df, selected_categories, selected_locations)
                 st.plotly_chart(fig, use_container_width=True)
-            
+
                 # Reorganizar las columnas para que "Category of impact" sea la primera
                 columns_order = ['Category of impact', 'Location', 'Production', 'Transport à l\'usine', 'transformation', 'Transport au marché']
                 df_filtered = df_filtered[columns_order]
-            
+
                 # Mostrar la tabla con los datos filtrados
                 st.subheader("Données normalisées et désagrégées par catégorie d'impact et par lieu.")
                 st.dataframe(df_filtered)
-            
-            # Ejecutar la función principal
-            if __name__ == "__main__":
-                main()
+           
 
 with PR:
     if DD == "**Production de racines de manioc**":
