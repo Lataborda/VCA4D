@@ -447,7 +447,7 @@ with PR:
             options_categories = st.multiselect(
                 "Sélectionnez les catégories d'impact à afficher :",
                 df_normalized.index.tolist(),
-                default=df_normalized.index.tolist()
+                default=["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", "Natural land transformation", "Water depletion"]  # Categorías por defecto
             )
             
             # Filtrar el DataFrame según las selecciones
