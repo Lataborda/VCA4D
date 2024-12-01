@@ -468,6 +468,7 @@ with PR:
                 filtered_data.plot(kind='barh', ax=ax, width=0.9)
                 ax.set_xlabel("Pourcentage de la valeur maximale (%)")
                 ax.set_title("Évaluation de l'Impact par Catégorie et Localité")
+                ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.3), ncol=4)  # Cambiar la ubicación de la leyenda
                 st.pyplot(fig)
             else:
                 st.write("Veuillez sélectionner au moins une localité et une catégorie d'impact.")
