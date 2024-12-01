@@ -315,7 +315,6 @@ with TR:
                         tickvals=[i * len(locations) + len(locations) / 2 - 0.5 for i in range(len(categories))],
                         ticktext=categories,
                         tickfont=dict(size=16),# Aumentar el tamaño de las etiquetas
-                        tickangle=-90 
                     ),
                     showlegend=True,
                     height=1500  # Ajustar según sea necesario
