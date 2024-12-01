@@ -361,8 +361,7 @@ with TR:
 with PR:
     if DD == "**Production de racines de manioc**":
 
-          en el siguiente código:
-"   # Definir los datos en un diccionario
+            # Definir los datos en un diccionario
             data = {
                 "Category": [
                     "Climate change", "Ozone depletion", "Terrestrial acidification", 
