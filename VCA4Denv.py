@@ -313,7 +313,7 @@ with TR:
                         title="Catégorie d'impact",
                         tickmode="array",
                         tickvals=[i * len(locations) + len(locations) / 2 - 0.5 for i in range(len(categories))],
-                        ticktext=categories
+                        ticktext=categories,
                         tickfont=dict(size=14),  # Aumentar el tamaño de las etiquetas
                     ),
                     showlegend=True,
