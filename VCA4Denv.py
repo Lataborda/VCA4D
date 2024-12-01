@@ -321,36 +321,38 @@ with TR:
 
                 return fig, df_filtered
 
-            # Función principal para ejecutar la aplicación Streamlit
+           # Función principal para ejecutar la aplicación Streamlit
             def main():
                 st.title('Visualisation des impacts environnementaux de la production de 1 ton de fufu dans quatre localités')
                 df = load_data()
-
+            
                 st.subheader("Impacts environnementaux potentiels de la production d'une tonne de fufu à partir de quatre unités de transformation.")
-
+            
                 # Obtener listas de todas las categorías y localidades
                 all_categories = df['Category of impact'].unique().tolist()
                 all_locations = df['Location'].unique().tolist()
-
-                 # Categorías por defecto
+            
+                # Categorías por defecto
                 default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", 
-                          "Natural land transformation", "Water depletion"]
-                
+                                      "Natural land transformation", "Water depletion"]
+            
                 # Crear selectores multiselect para categorías de impacto y localidades
-                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
+                selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=default_categories)
                 selected_locations = st.multiselect('Sélectionner les lieux', all_locations, default=all_locations)
-
+            
                 # Crear la gráfica con las categorías y localidades seleccionadas
                 fig, df_filtered = create_stacked_bar_chart(df, selected_categories, selected_locations)
                 st.plotly_chart(fig, use_container_width=True)
-
+            
                 # Reorganizar las columnas para que "Category of impact" sea la primera
                 columns_order = ['Category of impact', 'Location', 'Production', 'Transport à l\'usine', 'transformation', 'Transport au marché']
                 df_filtered = df_filtered[columns_order]
-
+            
                 # Mostrar la tabla con los datos filtrados
                 st.subheader("Données normalisées et désagrégées par catégorie d'impact et par lieu.")
                 st.dataframe(df_filtered)
+            
+            # Ejecutar la función principal
             if __name__ == "__main__":
                 main()
            
