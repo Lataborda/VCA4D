@@ -361,7 +361,7 @@ with TR:
 with PR:
     if DD == "**Production de racines de manioc**":
 
-            # Definir los datos en un diccionario
+# Definir los datos en un diccionario
             data = {
                 "Category": [
                     "Climate change", "Ozone depletion", "Terrestrial acidification", 
@@ -396,74 +396,47 @@ with PR:
                     25.8, 5.82e-7, 0.546, 0.566, 0.00187, 0.576, 0.0532, 0.0181,
                     0.000715, 0.00224, 0.0048, 0.217, 0.817, 0.184, 0.00337, 0.0993,
                     0.475, 1.32
-                ],
-                "P5 Kwango / Plateau Bateke": [
-                    27.1, 1.56e-6, 3.89, 0.754, 0.00428, 3.71, 0.283, 0.103,
-                    0.00461, 0.0145, 0.0299, 1.4, 5.27, 1.15, 0.00333, 0.0641,
-                    2.96, 8.5
-                ],
-                "P6 Kwilu": [
-                    43.2, 1.07e-6, 0.205, 0.97, 0.00976, 3.06, 0.314, 0.108,
-                    0.00444, 0.0139, 0.029, 1.35, 5.08, 1.19, 0.00785, 0.0541,
-                    2.87, 8.2
-                ],
-                "P7 Sud-Kivu": [
-                    30.1, 3.62e-6, 0.081, 0.797, 0.00468, 3.58, 0.129, 0.0401,
-                    0.00131, 0.0041, 0.0088, 0.397, 1.5, 0.337, 0.00231, 0.0182,
-                    0.871, 2.41
-                ],
-                "P8 Tshopo": [
-                    11.1, 1.07e-6, 0.039, 0.31, 0.000768, 1.05, 0.129, 0.0401,
-                    0.000449, 0.00131, 0.00299, 0.088, 1.5, 0.337, 0.000231, 0.0182,
-                    0.871, 2.41
                 ]
             }
-            
+
             # Crear DataFrame
             df = pd.DataFrame(data)
-            
+
             # Combinar categoría con unidad
             df['Category'] = df['Category'] + " (" + df['Unit'] + ")"
-            
+
             # Eliminar la columna 'Unit' ya que ya está combinada
             df.drop('Unit', axis=1, inplace=True)
-            
+
             # Normalizar los valores al máximo de cada fila
             df_normalized = df.set_index("Category")
             df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
-            
+
             # Configuración de Streamlit
             st.title("Analyse Comparative de l'Impact Environnemental Normalisé")
             st.write("Visualisation des impacts environnementaux normalisés pour diverses localités.")
-            
-            # Selector múltiple para columnas (localidades)
-            options_locations = st.multiselect(
-                "Sélectionnez les localités à afficher :",
-                list(df_normalized.columns),
-                default=list(df_normalized.columns)
-            )
-            
-            # Selector múltiple para categorías de impacto
-            default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", "Natural land transformation", "Water depletion"]
-            options_categories = st.multiselect(
-                "Sélectionnez les catégories d'impact à afficher :",
-                df_normalized.index.tolist(),
-                default=[cat for cat in default_categories if cat in df_normalized.index.tolist()]  # Validación de categorías por defecto
-            )
-            
-            # Filtrar el DataFrame según las selecciones
-            if options_locations and options_categories:
-                filtered_data = df_normalized.loc[options_categories, options_locations]
-            
+
+            # Mostrar el DataFrame original y normalizado
+            st.subheader("Données Originales")
+            st.dataframe(df)
+            st.subheader("Données Normalisées")
+            st.dataframe(df_normalized)
+
+            # Selector múltiple para las columnas
+            options = st.multiselect("Sélectionnez les localités à afficher:", list(df_normalized.columns), default=list(df_normalized.columns))
+
+            # Filtrar el dataframe para incluir solo las columnas seleccionadas
+            if options:
+                filtered_data = df_normalized[options]
+
                 # Crear y mostrar el gráfico
                 fig, ax = plt.subplots(figsize=(10, 8))
-                filtered_data.plot(kind='barh', ax=ax, width=0.9)
+                filtered_data.plot(kind='barh', ax=ax)
                 ax.set_xlabel("Pourcentage de la valeur maximale (%)")
                 ax.set_title("Évaluation de l'Impact par Catégorie et Localité")
-                ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
                 st.pyplot(fig)
             else:
-                st.write("Veuillez sélectionner au moins une localité et une catégorie d'impact.")
+                st.write("Aucune localité sélectionnée. Veuillez en sélectionner au moins une.")
 
                 
 with EN:
