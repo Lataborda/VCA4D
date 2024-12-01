@@ -462,7 +462,7 @@ with PR:
                 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
                 st.pyplot(fig)
             else:
-                st.write("Veuillez sélectionner au moins une localité et une catégorie d'impact.")"
+                st.write("Veuillez sélectionner au moins une localité et une catégorie d'impact.")
 
                 
 with EN:
