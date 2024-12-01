@@ -361,7 +361,6 @@ with TR:
 with PR:
     if DD == "**Production de racines de manioc**":
 
-                     
             # Definir los datos en un diccionario
             data = {
                 "Category": [
@@ -388,36 +387,7 @@ with PR:
                     0.00119, 0.00374, 0.00802, 0.362, 1.36, 0.307, 0.00211, 0.066,
                     0.793, 2.2
                 ],
-                "P3 Mbanza Ngungu": [
-                    25.5, 1.34e-6, 0.713, 1.13, 0.00376, 1.33, 0.108, 0.0384,
-                    0.00165, 0.00516, 0.0111, 0.499, 1.88, 0.424, 0.00291, 0.0793,
-                    1.09, 3.04
-                ],
-                "P4 Seeke-Banza": [
-                    25.8, 5.82e-7, 0.546, 0.566, 0.00187, 0.576, 0.0532, 0.0181,
-                    0.000715, 0.00224, 0.0048, 0.217, 0.817, 0.184, 0.00337, 0.0993,
-                    0.475, 1.32
-                ],
-                "P5 Kwango / Plateau Bateke": [
-                    27.1, 1.56e-6, 3.89, 0.754, 0.00428, 3.71, 0.283, 0.103,
-                    0.00461, 0.0145, 0.0299, 1.4, 5.27, 1.15, 0.00333, 0.0641,
-                    2.96, 8.5
-                ],
-                "P6 Kwilu": [
-                    43.2, 1.07e-6, 0.205, 0.97, 0.00976, 3.06, 0.314, 0.108,
-                    0.00444, 0.0139, 0.029, 1.35, 5.08, 1.19, 0.00785, 0.0541,
-                    2.87, 8.2
-                ],
-                "P7 Sud-Kivu": [
-                    30.1, 3.62e-6, 0.081, 0.797, 0.00468, 3.58, 0.129, 0.0401,
-                    0.00131, 0.0041, 0.0088, 0.397, 1.5, 0.337, 0.00231, 0.0182,
-                    0.871, 2.41
-                ],
-                "P8 Tshopo": [
-                    11.1, 1.07e-6, 0.039, 0.31, 0.000768, 1.05, 0.129, 0.0401,
-                    0.000449, 0.00131, 0.00299, 0.088, 1.5, 0.337, 0.000231, 0.0182,
-                    0.871, 2.41
-                ]
+                # Agregar más datos según sea necesario
             }
             
             # Crear DataFrame
@@ -437,22 +407,25 @@ with PR:
             st.title("Analyse Comparative de l'Impact Environnemental Normalisé")
             st.write("Visualisation des impacts environnementaux normalisés pour diverses localités.")
             
-            # Selector múltiple para columnas (localidades)
-            options_locations = st.multiselect(
-                "Sélectionnez les localités à afficher :",
-                list(df_normalized.columns),
-                default=list(df_normalized.columns)
-            )
-            
-            # Selector múltiple para categorías de impacto
+            # Validar las categorías disponibles en el índice
             all_categories = df_normalized.index.tolist()
+            
+            # Categorías por defecto, verificar si existen
             default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", "Natural land transformation", "Water depletion"]
             default_categories = [cat for cat in default_categories if cat in all_categories]
             
+            # Selector múltiple para categorías de impacto
             options_categories = st.multiselect(
                 "Sélectionnez les catégories d'impact à afficher :",
                 all_categories,
-                default=default_categories
+                default=default_categories  # Validar que existan
+            )
+            
+            # Selector múltiple para localidades
+            options_locations = st.multiselect(
+                "Sélectionnez les localités à afficher :",
+                list(df_normalized.columns),
+                default=list(df_normalized.columns)  # Todas las localidades por defecto
             )
             
             # Filtrar el DataFrame según las selecciones
