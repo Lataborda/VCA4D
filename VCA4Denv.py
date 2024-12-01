@@ -361,6 +361,7 @@ with TR:
 with PR:
     if DD == "**Production de racines de manioc**":
 
+                     
             # Definir los datos en un diccionario
             data = {
                 "Category": [
@@ -444,10 +445,14 @@ with PR:
             )
             
             # Selector múltiple para categorías de impacto
+            all_categories = df_normalized.index.tolist()
+            default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", "Natural land transformation", "Water depletion"]
+            default_categories = [cat for cat in default_categories if cat in all_categories]
+            
             options_categories = st.multiselect(
                 "Sélectionnez les catégories d'impact à afficher :",
-                df_normalized.index.tolist(),
-                default=["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", "Natural land transformation", "Water depletion"]  # Categorías por defecto
+                all_categories,
+                default=default_categories
             )
             
             # Filtrar el DataFrame según las selecciones
