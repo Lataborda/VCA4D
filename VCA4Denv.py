@@ -444,10 +444,11 @@ with PR:
             )
             
             # Selector múltiple para categorías de impacto
+            default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", "Natural land transformation", "Water depletion"]
             options_categories = st.multiselect(
                 "Sélectionnez les catégories d'impact à afficher :",
                 df_normalized.index.tolist(),
-                
+                default=[cat for cat in default_categories if cat in df_normalized.index.tolist()]  # Validación de categorías por defecto
             )
             
             # Filtrar el DataFrame según las selecciones
