@@ -332,6 +332,10 @@ with TR:
                 all_categories = df['Category of impact'].unique().tolist()
                 all_locations = df['Location'].unique().tolist()
 
+                 # Categorías por defecto
+                default_categories = ["Climate change", "Freshwater eutrophication", "Terrestrial ecotoxicity", 
+                          "Natural land transformation", "Water depletion"]
+                
                 # Crear selectores multiselect para categorías de impacto y localidades
                 selected_categories = st.multiselect("Sélectionner les catégories d'impact", all_categories, default=all_categories)
                 selected_locations = st.multiselect('Sélectionner les lieux', all_locations, default=all_locations)
