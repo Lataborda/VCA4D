@@ -422,9 +422,14 @@ with PR:
             # Crear DataFrame
             df = pd.DataFrame(data)
             
+            # Combinar categoría con unidad
+            df['Category'] = df['Category'] + " (" + df['Unit'] + ")"
+            
+            # Eliminar la columna 'Unit' ya que ya está combinada
+            df.drop('Unit', axis=1, inplace=True)
+            
             # Normalizar los valores al máximo de cada fila
             df_normalized = df.set_index("Category")
-            df_normalized = df_normalized.drop("Unit", axis=1)  # Excluir columna 'Unit' para normalización
             df_normalized = df_normalized.div(df_normalized.max(axis=1), axis=0) * 100
             
             # Configuración de Streamlit
@@ -432,9 +437,8 @@ with PR:
             st.write("Visualisation des impacts environnementaux normalisés pour diverses localités.")
             
             # Mostrar el DataFrame original y normalizado
-            st.subheader("Données Originales avec Unités")
-            st.dataframe(df)  # Mantener la columna 'Unit'
-            
+            st.subheader("Données Originales")
+            st.dataframe(df)
             st.subheader("Données Normalisées")
             st.dataframe(df_normalized)
             
@@ -450,8 +454,8 @@ with PR:
                 "Sélectionnez les catégories d'impact à afficher :",
                 list(df_normalized.index),
                 default=[
-                    "Climate change", "Freshwater eutrophication", 
-                    "Terrestrial ecotoxicity", "Natural land transformation"
+                    "Climate change (kg CO2 eq)", "Freshwater eutrophication (kg P eq)", 
+                    "Terrestrial ecotoxicity (kg 1,4-DB eq)", "Natural land transformation (m2)","Water depletion (m3)"
                 ]  # Selección de 4 categorías por defecto
             )
             
