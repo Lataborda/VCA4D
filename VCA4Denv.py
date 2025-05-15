@@ -6,6 +6,8 @@ import numpy as np
 import plotly.express as px
 from PIL import Image
 
+st.set_page_config(page_title="VCA4D_Env_DRC", layout="wide")
+
 header = st.container()
 VC = st.container() #Cassava Value Chain (agrégée)
 PR = st.container() #Production de racines de manioc
@@ -14,7 +16,7 @@ IN = st.container() #inventary of data
 ES = st.container() #Scenaria assessment
 EN = st.container() #Sendpoint
 
-st.set_page_config(page_title="VCA4D_Env_DRC", layout="wide")
+
 with header:
 
     st.header('Analyse environnementale ACV de la chaîne de valeur du manioc en RDC',divider='blue')
