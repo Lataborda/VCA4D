@@ -6,7 +6,7 @@ import numpy as np
 import plotly.express as px
 from PIL import Image
 
-st.set_page_config(page_title="VCA4D_Env_DRC", layout="wide")
+st.set_page_config(page_title="VCA4D_Env_DRC")
 
 header = st.container()
 VC = st.container() #Cassava Value Chain (agrégée)
