@@ -201,7 +201,7 @@ def build_system_limits_chart(
     ax.set_yticks(y_positions)
     ax.set_yticklabels(df_plot[label_col].tolist(), fontsize=12)
     ax.set_xlim(0, x_max)
-    ax.set_xlabel("Impact / SoSOS ratio")
+    ax.set_xlabel("Impact / SoSOS ratio", labelpad=18)
     ax.set_title(title, fontsize=16, fontweight="bold")
 
     ax.text(safe_limit / 2, len(df_plot) + 0.05, safe_label, ha="center", va="bottom",
