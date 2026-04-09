@@ -368,10 +368,20 @@ def main():
         )
 
     with colf3:
+        default_categories = [
+            "Global warming",
+            "Freshwater eutrophication",
+            "Terrestrial ecotoxicity",
+            "Land use",
+            "Water consumption"
+        ]
+        
+        default_categories = [c for c in default_categories if c in available_categories]
+        
         selected_categories = st.multiselect(
             "Select impact categories",
             options=available_categories,
-            default=available_categories
+            default=default_categories
         )
 
     filtered = working_df[
