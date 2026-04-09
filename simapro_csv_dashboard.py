@@ -5,7 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
 
-st.set_page_config(page_title="SimaPro CSV Dashboard", layout="wide")
+st.set_page_config(page_title="SimaPro CSV Dashboard + PB-LCA", layout="wide")
 
 
 def read_csv_flexible(uploaded_file):
@@ -83,6 +83,29 @@ def fig_to_png_download(fig):
     return buf
 
 
+def normalize_category_text(text):
+    """Light normalization to improve category matching across CSV files."""
+    if pd.isna(text):
+        return ""
+
+    text = str(text).strip().lower()
+    replacements = {
+        "é": "e", "è": "e", "ê": "e",
+        "á": "a", "à": "a", "â": "a",
+        "í": "i", "ï": "i",
+        "ó": "o", "ô": "o",
+        "ú": "u", "û": "u",
+        "ç": "c",
+    }
+
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+
+    text = text.replace("&", "and")
+    text = " ".join(text.split())
+    return text
+
+
 def build_bar_chart(filtered, category_col, unit_col, comparison_label, mode):
     pivot_df = filtered.pivot_table(
         index="Category_label",
@@ -144,18 +167,73 @@ def build_heatmap(filtered, comparison_label):
     return fig
 
 
+def build_system_limits_chart(
+    df_ratio,
+    ratio_col="Ratio",
+    label_col="Display_label",
+    x_max=3.0,
+    safe_limit=1.0,
+    warning_limit=2.0,
+    safe_label="Espace sûr",
+    warning_label="Zone d'attention",
+    risk_label="Risque élevé",
+    title="Impacts par rapport au Safe Operating Space"
+):
+    """Build a PB-LCA style system-limits chart with background bands."""
+    df_plot = df_ratio.copy().sort_values(ratio_col, ascending=True)
+    y_positions = np.arange(len(df_plot))
+
+    fig, ax = plt.subplots(figsize=(12, max(5, len(df_plot) * 0.55)))
+
+    ax.axvspan(0, safe_limit, color="#0a8a3a", alpha=1.0, zorder=0)
+    ax.axvspan(safe_limit, warning_limit, color="#f2c500", alpha=1.0, zorder=0)
+    ax.axvspan(warning_limit, x_max, color="#ef2b0c", alpha=1.0, zorder=0)
+
+    for x in np.arange(0.5, x_max + 0.001, 0.5):
+        ax.axvline(x, color="white", lw=1.5, alpha=0.8, zorder=1)
+
+    ax.axvline(safe_limit, color="white", lw=2.5, zorder=2)
+    ax.axvline(warning_limit, color="white", lw=2.5, zorder=2)
+
+    ratios = np.clip(df_plot[ratio_col].fillna(0).values, 0, x_max)
+    ax.barh(y_positions, ratios, color="black", edgecolor="black", height=0.35, zorder=3)
+
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(df_plot[label_col].tolist(), fontsize=12)
+    ax.set_xlim(0, x_max)
+    ax.set_xlabel("Impact / SoSOS ratio")
+    ax.set_title(title, fontsize=16, fontweight="bold")
+
+    ax.text(safe_limit / 2, len(df_plot) + 0.05, safe_label, ha="center", va="bottom",
+            fontsize=16, color="#0a8a3a", fontweight="bold")
+    ax.text((safe_limit + warning_limit) / 2, len(df_plot) + 0.05, warning_label, ha="center", va="bottom",
+            fontsize=16, color="#c79a00", fontweight="bold")
+    ax.text((warning_limit + x_max) / 2, len(df_plot) + 0.05, risk_label, ha="center", va="bottom",
+            fontsize=16, color="#d92c16", fontweight="bold")
+
+    for idx, actual in enumerate(df_plot[ratio_col].fillna(0).values):
+        if actual > x_max:
+            ax.text(x_max - 0.03, idx, f">{x_max:.1f}", va="center", ha="right",
+                    color="white", fontsize=10, fontweight="bold")
+
+    ax.invert_yaxis()
+    plt.tight_layout()
+    return fig
+
+
 def show_intro():
-    st.title("SimaPro CSV Dashboard")
+    st.title("SimaPro CSV Dashboard + PB-LCA System Limits")
     st.markdown(
         """
         Upload one or more CSV files exported from SimaPro and compare products, scenarios,
         sites or any other entities. The app can clean values, normalize impacts by row,
-        generate comparative charts and export filtered outputs.
+        generate comparative charts, export filtered outputs and build a PB-LCA style
+        system-limits chart using SoSOS values.
         """
     )
 
     st.info(
-        "Recommended CSV structure: first one column for impact category, one for unit, "
+        "Recommended impact CSV structure: one column for impact category, one for unit, "
         "and the remaining columns as products, scenarios, sites or systems to compare."
     )
 
@@ -164,7 +242,7 @@ def main():
     show_intro()
 
     uploaded_files = st.file_uploader(
-        "Upload one or more CSV files",
+        "Upload one or more impact CSV files",
         type=["csv"],
         accept_multiple_files=True
     )
@@ -364,6 +442,151 @@ def main():
         file_name="simapro_filtered_data.csv",
         mime="text/csv"
     )
+
+    st.divider()
+    st.subheader("7. PB-LCA system limits chart")
+    st.write(
+        "Use a second CSV with SoSOS values to calculate the ratio Impact / SoSOS and build a "
+        "system-limits chart similar to the safe-space / high-risk figure."
+    )
+
+    reference_file = st.file_uploader(
+        "Upload SoSOS / reference limits CSV",
+        type=["csv"],
+        key="reference_file"
+    )
+
+    st.caption(
+        "Recommended reference CSV columns: one category column, one SoSOS column, and optional display label and order columns."
+    )
+
+    if reference_file is not None:
+        try:
+            ref_raw = read_csv_flexible(reference_file)
+            st.markdown("**Reference limits preview**")
+            st.dataframe(ref_raw.head(10), use_container_width=True)
+
+            ref_col1, ref_col2, ref_col3, ref_col4 = st.columns(4)
+
+            with ref_col1:
+                ref_category_col = st.selectbox("Reference category column", ref_raw.columns, key="ref_category")
+            with ref_col2:
+                ref_sosos_col = st.selectbox("SoSOS column", ref_raw.columns, key="ref_sosos")
+            with ref_col3:
+                label_options = ["<use impact category>"] + list(ref_raw.columns)
+                ref_label_col = st.selectbox("Display label column (optional)", label_options, key="ref_label")
+            with ref_col4:
+                order_options = ["<keep current order>"] + list(ref_raw.columns)
+                ref_order_col = st.selectbox("Order column (optional)", order_options, key="ref_order")
+
+            ref_df = ref_raw.copy()
+            ref_df[ref_sosos_col] = pd.to_numeric(ref_df[ref_sosos_col], errors="coerce")
+            ref_df = ref_df.dropna(subset=[ref_sosos_col])
+            ref_df["category_key"] = ref_df[ref_category_col].apply(normalize_category_text)
+
+            if ref_label_col == "<use impact category>":
+                ref_df["Display_label"] = ref_df[ref_category_col].astype(str)
+            else:
+                ref_df["Display_label"] = ref_df[ref_label_col].astype(str)
+
+            if ref_order_col == "<keep current order>":
+                ref_df["plot_order"] = np.arange(len(ref_df))
+            else:
+                ref_df["plot_order"] = pd.to_numeric(ref_df[ref_order_col], errors="coerce")
+                ref_df["plot_order"] = ref_df["plot_order"].fillna(pd.Series(np.arange(len(ref_df)), index=ref_df.index))
+
+            pb_base = original_all.copy()
+            pb_base["category_key"] = pb_base[category_col].apply(normalize_category_text)
+
+            pb_sources = sorted(pb_base["Source"].dropna().unique().tolist())
+            pb_entities = sorted(pb_base[comparison_label].dropna().unique().tolist())
+
+            colpb1, colpb2 = st.columns(2)
+            with colpb1:
+                pb_source = st.selectbox("Select file for PB-LCA chart", pb_sources, key="pb_source")
+            with colpb2:
+                pb_entity = st.selectbox(f"Select {comparison_label.lower()} for PB-LCA chart", pb_entities, key="pb_entity")
+
+            pb_filtered = pb_base[
+                (pb_base["Source"] == pb_source) &
+                (pb_base[comparison_label] == pb_entity)
+            ].copy()
+
+            pb_merged = pb_filtered.merge(
+                ref_df[["category_key", ref_sosos_col, "Display_label", "plot_order"]],
+                on="category_key",
+                how="inner"
+            )
+
+            if pb_merged.empty:
+                st.warning("No matching categories were found between the impact table and the SoSOS table.")
+            else:
+                pb_merged["Ratio"] = pb_merged["Value"] / pb_merged[ref_sosos_col]
+                pb_merged = pb_merged.sort_values("plot_order")
+
+                st.markdown("**PB-LCA merged table**")
+                st.dataframe(
+                    pb_merged[[category_col, unit_col, comparison_label, "Value", ref_sosos_col, "Ratio", "Display_label"]],
+                    use_container_width=True
+                )
+
+                max_ratio = float(np.nanmax(pb_merged["Ratio"].values)) if len(pb_merged) > 0 else 3.0
+                default_xmax = max(3.0, min(float(np.ceil(max_ratio)), 10.0))
+
+                cfg1, cfg2, cfg3 = st.columns(3)
+                with cfg1:
+                    x_max = st.number_input("X-axis maximum", min_value=1.5, max_value=20.0, value=float(default_xmax), step=0.5)
+                with cfg2:
+                    warning_limit = st.number_input("Second visual threshold", min_value=1.1, max_value=20.0, value=2.0, step=0.1)
+                with cfg3:
+                    chart_title = st.text_input(
+                        "Chart title",
+                        value=f"{pb_entity} vs system limits"
+                    )
+
+                safe_label = st.text_input("Safe zone label", value="Espace sûr")
+                warning_label = st.text_input("Middle zone label", value="Zone d'attention")
+                risk_label = st.text_input("High-risk zone label", value="Risque élevé")
+
+                pb_fig = build_system_limits_chart(
+                    pb_merged,
+                    ratio_col="Ratio",
+                    label_col="Display_label",
+                    x_max=float(x_max),
+                    safe_limit=1.0,
+                    warning_limit=float(warning_limit),
+                    safe_label=safe_label,
+                    warning_label=warning_label,
+                    risk_label=risk_label,
+                    title=chart_title
+                )
+
+                st.pyplot(pb_fig)
+
+                pb_png = fig_to_png_download(pb_fig)
+                st.download_button(
+                    "Download system limits chart as PNG",
+                    data=pb_png,
+                    file_name="pb_lca_system_limits_chart.png",
+                    mime="image/png"
+                )
+
+                pb_csv = pb_merged.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    "Download PB-LCA merged table as CSV",
+                    data=pb_csv,
+                    file_name="pb_lca_ratios.csv",
+                    mime="text/csv"
+                )
+
+                st.info(
+                    "Methodological note: the threshold at 1.0 corresponds to the PB-LCA interpretation "
+                    "Impact / SoSOS = 1. Values above 1 exceed the assigned safe operating space. "
+                    "Additional bands above 1 are communication choices unless they are supported by a specific uncertainty analysis."
+                )
+
+        except Exception as e:
+            st.error(f"Could not process the SoSOS reference CSV: {e}")
 
 
 if __name__ == "__main__":
