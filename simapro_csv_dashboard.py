@@ -108,13 +108,11 @@ def normalize_category_text(text):
 
 def build_bar_chart(filtered, category_col, unit_col, comparison_label, mode):
     pivot_df = filtered.pivot_table(
-        index="Category_label",
-        columns=[comparison_label, "Source"],
-        values="Value",
-        aggfunc="mean"
+    index="Category_label",
+    columns=comparison_label,
+    values="Value",
+    aggfunc="mean"
     )
-
-    pivot_df.columns = [f"{col[0]} | {col[1]}" for col in pivot_df.columns]
     pivot_df = pivot_df.sort_index()
 
     fig, ax = plt.subplots(figsize=(12, max(6, len(pivot_df) * 0.45)))
