@@ -603,7 +603,7 @@ def main():
         mime="text/csv"
     )
 
-       st.divider()
+    st.divider()
     st.subheader("7. PB-LCA system limits chart")
     st.write(
         "Use a second CSV with SoSOS values to calculate the ratio Impact / SoSOS and build "
