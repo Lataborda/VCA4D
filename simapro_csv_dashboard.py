@@ -218,6 +218,158 @@ def build_system_limits_chart(
     plt.tight_layout()
     return fig
 
+def build_system_limits_chart_multi(
+    df_ratio,
+    ratio_col="Ratio",
+    label_col="Display_label",
+    entity_col="Entity",
+    order_col="plot_order",
+    x_max=3.0,
+    safe_limit=1.0,
+    warning_limit=2.0,
+    safe_label="Espace sûr",
+    warning_label="Zone d'attention",
+    risk_label="Risque élevé",
+    title="Comparaison des produits vs limites du système"
+):
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    df_plot = df_ratio.copy()
+
+    # Orden de categorías
+    if order_col in df_plot.columns:
+        category_order = (
+            df_plot[[label_col, order_col]]
+            .drop_duplicates()
+            .sort_values(order_col)[label_col]
+            .tolist()
+        )
+    else:
+        category_order = df_plot[label_col].drop_duplicates().tolist()
+
+    # Orden de entidades
+    entity_order = df_plot[entity_col].drop_duplicates().tolist()
+
+    # Colores y etiquetas internas
+    entity_styles = {
+        "Amidon": {"color": "#1f77b4", "short": "A"},
+        "Bobolo": {"color": "#ff7f0e", "short": "B"},
+        "Farine P. Industriel": {"color": "#17becf", "short": "FI"},
+        "Farine P. Rurale": {"color": "#8c564b", "short": "FR"},
+        "Gari": {"color": "#9467bd", "short": "G"},
+    }
+
+    default_color = "#4d4d4d"
+
+    n_cat = len(category_order)
+    n_ent = len(entity_order)
+
+    fig, ax = plt.subplots(figsize=(14, max(7, n_cat * 1.5)))
+
+    # Fondo por zonas
+    ax.axvspan(0, safe_limit, color="#0a8a3a", alpha=1.0, zorder=0)
+    ax.axvspan(safe_limit, warning_limit, color="#f2c500", alpha=1.0, zorder=0)
+    ax.axvspan(warning_limit, x_max, color="#ef2b0c", alpha=1.0, zorder=0)
+
+    # Guías verticales
+    for x in np.arange(0.5, x_max + 0.001, 0.5):
+        ax.axvline(x, color="white", lw=1.5, alpha=0.85, zorder=1)
+
+    ax.axvline(safe_limit, color="white", lw=2.7, zorder=2)
+    ax.axvline(warning_limit, color="white", lw=2.7, zorder=2)
+
+    # Posiciones por categoría
+    y_base = np.arange(n_cat)
+
+    # Barras finas por entidad dentro de cada categoría
+    group_height = 0.78
+    bar_height = group_height / max(n_ent, 1)
+
+    for i, entity in enumerate(entity_order):
+        offsets = y_base - group_height / 2 + (i + 0.5) * bar_height
+
+        ratios = []
+        for cat in category_order:
+            subset = df_plot[
+                (df_plot[label_col] == cat) &
+                (df_plot[entity_col] == entity)
+            ]
+            if len(subset) > 0:
+                ratios.append(float(subset[ratio_col].iloc[0]))
+            else:
+                ratios.append(0.0)
+
+        ratios_clipped = np.clip(ratios, 0, x_max)
+        color = entity_styles.get(entity, {}).get("color", default_color)
+        short_label = entity_styles.get(entity, {}).get("short", entity[:1].upper())
+
+        ax.barh(
+            offsets,
+            ratios_clipped,
+            height=bar_height * 0.82,
+            color=color,
+            edgecolor="white",
+            linewidth=0.8,
+            zorder=3,
+            label=entity
+        )
+
+        # Letras blancas dentro de las barras
+        for y, val in zip(offsets, ratios_clipped):
+            if val > 0.09:
+                x_text = max(min(val - 0.03, x_max - 0.05), 0.04)
+                ax.text(
+                    x_text,
+                    y,
+                    short_label,
+                    va="center",
+                    ha="right",
+                    color="white",
+                    fontsize=8.5,
+                    fontweight="bold",
+                    zorder=4
+                )
+
+    ax.set_yticks(y_base)
+    ax.set_yticklabels(category_order, fontsize=13)
+    ax.set_xlim(0, x_max)
+    ax.set_xlabel("Impact / SoSOS ratio", labelpad=18, fontsize=13)
+    ax.set_title(title, fontsize=20, fontweight="bold")
+
+    # Etiquetas de zonas abajo
+    ax.text(
+        safe_limit / 2, -0.12, safe_label,
+        transform=ax.get_xaxis_transform(),
+        ha="center", va="center",
+        fontsize=18, color="#0a8a3a", fontweight="bold"
+    )
+    ax.text(
+        (safe_limit + warning_limit) / 2, -0.12, warning_label,
+        transform=ax.get_xaxis_transform(),
+        ha="center", va="center",
+        fontsize=18, color="#c79a00", fontweight="bold"
+    )
+    ax.text(
+        (warning_limit + x_max) / 2, -0.12, risk_label,
+        transform=ax.get_xaxis_transform(),
+        ha="center", va="center",
+        fontsize=18, color="#d92c16", fontweight="bold"
+    )
+
+    ax.legend(
+        title="Produit",
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.18),
+        ncol=min(5, n_ent),
+        frameon=True
+    )
+
+    ax.invert_yaxis()
+    fig.subplots_adjust(bottom=0.24)
+    plt.tight_layout()
+
+    return fig
 
 def show_intro():
     st.title("SimaPro CSV Dashboard + PB-LCA System Limits")
