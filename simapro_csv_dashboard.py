@@ -603,11 +603,11 @@ def main():
         mime="text/csv"
     )
 
-    st.divider()
+       st.divider()
     st.subheader("7. PB-LCA system limits chart")
     st.write(
-        "Use a second CSV with SoSOS values to calculate the ratio Impact / SoSOS and build a "
-        "system-limits chart similar to the safe-space / high-risk figure."
+        "Use a second CSV with SoSOS values to calculate the ratio Impact / SoSOS and build "
+        "either a single-product or multi-product PB-LCA chart."
     )
 
     reference_file = st.file_uploader(
@@ -629,19 +629,39 @@ def main():
             ref_col1, ref_col2, ref_col3, ref_col4 = st.columns(4)
 
             with ref_col1:
-                ref_category_col = st.selectbox("Reference category column", ref_raw.columns, key="ref_category")
+                ref_category_col = st.selectbox(
+                    "Reference category column",
+                    ref_raw.columns,
+                    key="ref_category"
+                )
+
             with ref_col2:
-                ref_sosos_col = st.selectbox("SoSOS column", ref_raw.columns, key="ref_sosos")
+                ref_sosos_col = st.selectbox(
+                    "SoSOS column",
+                    ref_raw.columns,
+                    key="ref_sosos"
+                )
+
             with ref_col3:
                 label_options = ["<use impact category>"] + list(ref_raw.columns)
-                ref_label_col = st.selectbox("Display label column (optional)", label_options, key="ref_label")
+                ref_label_col = st.selectbox(
+                    "Display label column (optional)",
+                    label_options,
+                    key="ref_label"
+                )
+
             with ref_col4:
                 order_options = ["<keep current order>"] + list(ref_raw.columns)
-                ref_order_col = st.selectbox("Order column (optional)", order_options, key="ref_order")
+                ref_order_col = st.selectbox(
+                    "Order column (optional)",
+                    order_options,
+                    key="ref_order"
+                )
 
             ref_df = ref_raw.copy()
             ref_df[ref_sosos_col] = pd.to_numeric(ref_df[ref_sosos_col], errors="coerce")
             ref_df = ref_df.dropna(subset=[ref_sosos_col])
+
             ref_df["category_key"] = ref_df[ref_category_col].apply(normalize_category_text)
 
             if ref_label_col == "<use impact category>":
@@ -653,24 +673,59 @@ def main():
                 ref_df["plot_order"] = np.arange(len(ref_df))
             else:
                 ref_df["plot_order"] = pd.to_numeric(ref_df[ref_order_col], errors="coerce")
-                ref_df["plot_order"] = ref_df["plot_order"].fillna(pd.Series(np.arange(len(ref_df)), index=ref_df.index))
+                ref_df["plot_order"] = ref_df["plot_order"].fillna(np.arange(len(ref_df)))
 
+            # Base con impactos originales
             pb_base = original_all.copy()
             pb_base["category_key"] = pb_base[category_col].apply(normalize_category_text)
 
             pb_sources = sorted(pb_base["Source"].dropna().unique().tolist())
-            pb_entities = sorted(pb_base[comparison_label].dropna().unique().tolist())
+            pb_all_entities = sorted(pb_base[comparison_label].dropna().unique().tolist())
 
-            colpb1, colpb2 = st.columns(2)
-            with colpb1:
-                pb_source = st.selectbox("Select file for PB-LCA chart", pb_sources, key="pb_source")
-            with colpb2:
-                pb_entity = st.selectbox(f"Select {comparison_label.lower()} for PB-LCA chart", pb_entities, key="pb_entity")
+            st.markdown("### PB-LCA chart settings")
 
-            pb_filtered = pb_base[
-                (pb_base["Source"] == pb_source) &
-                (pb_base[comparison_label] == pb_entity)
-            ].copy()
+            chart_mode = st.radio(
+                "PB-LCA chart mode",
+                ["Single product", "Multi-product comparison"],
+                horizontal=True,
+                key="pb_chart_mode"
+            )
+
+            cfg_a, cfg_b = st.columns(2)
+
+            with cfg_a:
+                pb_source = st.selectbox(
+                    "Select file for PB-LCA chart",
+                    pb_sources,
+                    key="pb_source"
+                )
+
+            if chart_mode == "Single product":
+                with cfg_b:
+                    pb_entity = st.selectbox(
+                        f"Select {comparison_label.lower()} for PB-LCA chart",
+                        pb_all_entities,
+                        key="pb_entity_single"
+                    )
+
+                pb_filtered = pb_base[
+                    (pb_base["Source"] == pb_source) &
+                    (pb_base[comparison_label] == pb_entity)
+                ].copy()
+
+            else:
+                with cfg_b:
+                    pb_entities = st.multiselect(
+                        f"Select {comparison_label.lower()}s for PB-LCA chart",
+                        pb_all_entities,
+                        default=pb_all_entities[:5],
+                        key="pb_entities_multi"
+                    )
+
+                pb_filtered = pb_base[
+                    (pb_base["Source"] == pb_source) &
+                    (pb_base[comparison_label].isin(pb_entities))
+                ].copy()
 
             pb_merged = pb_filtered.merge(
                 ref_df[["category_key", ref_sosos_col, "Display_label", "plot_order"]],
@@ -682,44 +737,78 @@ def main():
                 st.warning("No matching categories were found between the impact table and the SoSOS table.")
             else:
                 pb_merged["Ratio"] = pb_merged["Value"] / pb_merged[ref_sosos_col]
-                pb_merged = pb_merged.sort_values("plot_order")
+                pb_merged = pb_merged.sort_values(["plot_order", comparison_label])
 
                 st.markdown("**PB-LCA merged table**")
-                st.dataframe(
-                    pb_merged[[category_col, unit_col, comparison_label, "Value", ref_sosos_col, "Ratio", "Display_label"]],
-                    use_container_width=True
-                )
+                preview_cols = [category_col, unit_col, comparison_label, "Value", ref_sosos_col, "Ratio", "Display_label"]
+                st.dataframe(pb_merged[preview_cols], use_container_width=True)
 
                 max_ratio = float(np.nanmax(pb_merged["Ratio"].values)) if len(pb_merged) > 0 else 3.0
-                default_xmax = max(3.0, min(float(np.ceil(max_ratio)), 10.0))
+                default_xmax = max(3.0, min(np.ceil(max_ratio), 10.0))
 
                 cfg1, cfg2, cfg3 = st.columns(3)
+
                 with cfg1:
-                    x_max = st.number_input("X-axis maximum", min_value=1.5, max_value=20.0, value=float(default_xmax), step=0.5)
+                    x_max = st.number_input(
+                        "X-axis maximum",
+                        min_value=1.5,
+                        max_value=20.0,
+                        value=float(default_xmax),
+                        step=0.5
+                    )
+
                 with cfg2:
-                    warning_limit = st.number_input("Second visual threshold", min_value=1.1, max_value=20.0, value=2.0, step=0.1)
+                    warning_limit = st.number_input(
+                        "Second visual threshold",
+                        min_value=1.1,
+                        max_value=20.0,
+                        value=2.0,
+                        step=0.1
+                    )
+
                 with cfg3:
+                    if chart_mode == "Single product":
+                        default_title = f"{pb_entity} vs system limits"
+                    else:
+                        default_title = "Comparaison des produits vs limites du système"
+
                     chart_title = st.text_input(
                         "Chart title",
-                        value=f"{pb_entity} vs system limits"
+                        value=default_title
                     )
 
                 safe_label = st.text_input("Safe zone label", value="Espace sûr")
                 warning_label = st.text_input("Middle zone label", value="Zone d'attention")
                 risk_label = st.text_input("High-risk zone label", value="Risque élevé")
 
-                pb_fig = build_system_limits_chart(
-                    pb_merged,
-                    ratio_col="Ratio",
-                    label_col="Display_label",
-                    x_max=float(x_max),
-                    safe_limit=1.0,
-                    warning_limit=float(warning_limit),
-                    safe_label=safe_label,
-                    warning_label=warning_label,
-                    risk_label=risk_label,
-                    title=chart_title
-                )
+                if chart_mode == "Single product":
+                    pb_fig = build_system_limits_chart(
+                        pb_merged,
+                        ratio_col="Ratio",
+                        label_col="Display_label",
+                        x_max=float(x_max),
+                        safe_limit=1.0,
+                        warning_limit=float(warning_limit),
+                        safe_label=safe_label,
+                        warning_label=warning_label,
+                        risk_label=risk_label,
+                        title=chart_title
+                    )
+                else:
+                    pb_fig = build_system_limits_chart_multi(
+                        pb_merged.rename(columns={comparison_label: "Entity"}),
+                        ratio_col="Ratio",
+                        label_col="Display_label",
+                        entity_col="Entity",
+                        order_col="plot_order",
+                        x_max=float(x_max),
+                        safe_limit=1.0,
+                        warning_limit=float(warning_limit),
+                        safe_label=safe_label,
+                        warning_label=warning_label,
+                        risk_label=risk_label,
+                        title=chart_title
+                    )
 
                 st.pyplot(pb_fig)
 
