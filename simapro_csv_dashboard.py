@@ -251,7 +251,7 @@ def build_system_limits_chart_multi(
     # Orden de entidades
     entity_order = df_plot[entity_col].drop_duplicates().tolist()
 
-    # Colores y etiquetas internas
+    # Colores y siglas
     entity_styles = {
         "Amidon": {"color": "#1f77b4", "short": "A"},
         "Bobolo": {"color": "#ff7f0e", "short": "B"},
@@ -265,7 +265,7 @@ def build_system_limits_chart_multi(
     n_cat = len(category_order)
     n_ent = len(entity_order)
 
-    fig, ax = plt.subplots(figsize=(14, max(7, n_cat * 1.5)))
+    fig, ax = plt.subplots(figsize=(14, max(7, n_cat * 1.6)))
 
     # Fondo por zonas
     ax.axvspan(0, safe_limit, color="#0a8a3a", alpha=1.0, zorder=0)
@@ -279,11 +279,23 @@ def build_system_limits_chart_multi(
     ax.axvline(safe_limit, color="white", lw=2.7, zorder=2)
     ax.axvline(warning_limit, color="white", lw=2.7, zorder=2)
 
-    # Posiciones por categoría
-    y_base = np.arange(n_cat)
+    # MÁS ESPACIO ENTRE CATEGORÍAS
+    y_base = np.arange(n_cat) * 1.25
+
+    # Líneas horizontales punteadas entre categorías
+    separator_y = (y_base[:-1] + y_base[1:]) / 2
+    for y in separator_y:
+        ax.hlines(
+            y, 0, x_max,
+            colors="white",
+            linestyles=(0, (2, 3)),
+            linewidth=1.0,
+            alpha=0.7,
+            zorder=2
+        )
 
     # Barras finas por entidad dentro de cada categoría
-    group_height = 0.78
+    group_height = 0.82
     bar_height = group_height / max(n_ent, 1)
 
     for i, entity in enumerate(entity_order):
@@ -307,17 +319,17 @@ def build_system_limits_chart_multi(
         ax.barh(
             offsets,
             ratios_clipped,
-            height=bar_height * 0.82,
+            height=bar_height * 0.78,
             color=color,
             edgecolor="white",
-            linewidth=0.8,
+            linewidth=0.9,
             zorder=3,
             label=entity
         )
 
-        # Letras blancas dentro de las barras
+        # Etiquetas blancas dentro de las barras
         for y, val in zip(offsets, ratios_clipped):
-            if val > 0.09:
+            if val > 0.10:
                 x_text = max(min(val - 0.03, x_max - 0.05), 0.04)
                 ax.text(
                     x_text,
@@ -334,24 +346,28 @@ def build_system_limits_chart_multi(
     ax.set_yticks(y_base)
     ax.set_yticklabels(category_order, fontsize=13)
     ax.set_xlim(0, x_max)
-    ax.set_xlabel("Impact / SoSOS ratio", labelpad=18, fontsize=13)
+
+    # Separar mejor el xlabel de las etiquetas de zona
+    ax.set_xlabel("Impact / SoSOS ratio", fontsize=13)
+    ax.xaxis.set_label_coords(0.5, -0.10)
+
     ax.set_title(title, fontsize=20, fontweight="bold")
 
-    # Etiquetas de zonas abajo
+    # Bajar un poco más las etiquetas de zonas
     ax.text(
-        safe_limit / 2, -0.12, safe_label,
+        safe_limit / 2, -0.16, safe_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#0a8a3a", fontweight="bold"
     )
     ax.text(
-        (safe_limit + warning_limit) / 2, -0.12, warning_label,
+        (safe_limit + warning_limit) / 2, -0.16, warning_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#c79a00", fontweight="bold"
     )
     ax.text(
-        (warning_limit + x_max) / 2, -0.12, risk_label,
+        (warning_limit + x_max) / 2, -0.16, risk_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#d92c16", fontweight="bold"
@@ -366,8 +382,9 @@ def build_system_limits_chart_multi(
     )
 
     ax.invert_yaxis()
-    fig.subplots_adjust(bottom=0.24)
-    plt.tight_layout()
+
+    # Más margen inferior para que no se monten textos
+    fig.subplots_adjust(bottom=0.30)
 
     return fig
 
