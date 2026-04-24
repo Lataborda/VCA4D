@@ -348,8 +348,7 @@ def build_system_limits_chart_multi(
     ax.set_xlim(0, x_max)
 
     # Separar mejor el xlabel de las etiquetas de zona
-    ax.set_xlabel("Impact / SoSOS ratio", fontsize=13)
-    ax.xaxis.set_label_coords(0.5, -0.10)
+    ax.set_xlabel("Impact / SoSOS ratio", fontsize=13, labelpad=6)
 
     ax.set_title(title, fontsize=20, fontweight="bold")
 
