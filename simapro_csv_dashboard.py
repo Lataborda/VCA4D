@@ -202,7 +202,7 @@ def build_system_limits_chart(
     
     # Mover el xlabel manualmente
     ax.set_xlabel("Impact / SoSOS ratio", fontsize=13)
-    ax.xaxis.set_label_coords(0.5, -0.03)
+    ax.xaxis.set_label_coords(0.5, -0.07)
     
     ax.set_title(title, fontsize=16, fontweight="bold")
     
