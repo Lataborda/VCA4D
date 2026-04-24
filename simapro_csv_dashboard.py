@@ -537,7 +537,7 @@ def main():
     with colf3:
         default_categories = [
             "Global warming",
-            #"Freshwater eutrophication",
+            "Freshwater eutrophication",
             "Terrestrial ecotoxicity",
             "Land use",
             "Water consumption"
