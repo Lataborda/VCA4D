@@ -202,27 +202,27 @@ def build_system_limits_chart(
     
     # Mover el xlabel manualmente
     ax.set_xlabel("Impact / SoSOS ratio", fontsize=13)
-    ax.xaxis.set_label_coords(0.5, -0.06)
+    ax.xaxis.set_label_coords(0.5, -0.03)
     
     ax.set_title(title, fontsize=16, fontweight="bold")
     
     # Bajar las etiquetas de zonas
     ax.text(
-        safe_limit / 2, -0.18, safe_label,
+        safe_limit / 2, -0.22, safe_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#0a8a3a", fontweight="bold"
     )
     
     ax.text(
-        (safe_limit + warning_limit) / 2, -0.18, warning_label,
+        (safe_limit + warning_limit) / 2, -0.22, warning_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#c79a00", fontweight="bold"
     )
     
     ax.text(
-        (warning_limit + x_max) / 2, -0.18, risk_label,
+        (warning_limit + x_max) / 2, -0.22, risk_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#d92c16", fontweight="bold"
