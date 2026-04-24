@@ -354,19 +354,19 @@ def build_system_limits_chart_multi(
 
     # Bajar un poco más las etiquetas de zonas
     ax.text(
-        safe_limit / 2, -0.16, safe_label,
+        safe_limit / 2, -0.20, safe_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#0a8a3a", fontweight="bold"
     )
     ax.text(
-        (safe_limit + warning_limit) / 2, -0.16, warning_label,
+        (safe_limit + warning_limit) / 2, -0.20, warning_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#c79a00", fontweight="bold"
     )
     ax.text(
-        (warning_limit + x_max) / 2, -0.16, risk_label,
+        (warning_limit + x_max) / 2, -0.20, risk_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#d92c16", fontweight="bold"
@@ -383,7 +383,7 @@ def build_system_limits_chart_multi(
     ax.invert_yaxis()
 
     # Más margen inferior para que no se monten textos
-    fig.subplots_adjust(bottom=0.30)
+    fig.subplots_adjust(bottom=0.32)
 
     return fig
 
