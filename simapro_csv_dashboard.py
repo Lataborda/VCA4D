@@ -197,26 +197,49 @@ def build_system_limits_chart(
     ax.barh(y_positions, ratios, color="black", edgecolor="black", height=0.35, zorder=3)
 
     ax.set_yticks(y_positions)
-    ax.set_yticklabels(df_plot[label_col].tolist(), fontsize=12)
-    ax.set_xlim(0, x_max)
-    ax.set_xlabel("Impact / SoSOS ratio", labelpad=18)
-    ax.set_title(title, fontsize=16, fontweight="bold")
+ax.set_yticklabels(df_plot[label_col].tolist(), fontsize=12)
+ax.set_xlim(0, x_max)
 
-    ax.text(safe_limit / 2, len(df_plot) + 0.05, safe_label, ha="center", va="bottom",
-            fontsize=16, color="#0a8a3a", fontweight="bold")
-    ax.text((safe_limit + warning_limit) / 2, len(df_plot) + 0.05, warning_label, ha="center", va="bottom",
-            fontsize=16, color="#c79a00", fontweight="bold")
-    ax.text((warning_limit + x_max) / 2, len(df_plot) + 0.05, risk_label, ha="center", va="bottom",
-            fontsize=16, color="#d92c16", fontweight="bold")
+# Mover el xlabel manualmente
+ax.set_xlabel("Impact / SoSOS ratio", fontsize=13)
+ax.xaxis.set_label_coords(0.5, -0.06)
 
-    for idx, actual in enumerate(df_plot[ratio_col].fillna(0).values):
-        if actual > x_max:
-            ax.text(x_max - 0.03, idx, f">{x_max:.1f}", va="center", ha="right",
-                    color="white", fontsize=10, fontweight="bold")
+ax.set_title(title, fontsize=16, fontweight="bold")
 
-    ax.invert_yaxis()
-    plt.tight_layout()
-    return fig
+# Bajar las etiquetas de zonas
+ax.text(
+    safe_limit / 2, -0.18, safe_label,
+    transform=ax.get_xaxis_transform(),
+    ha="center", va="center",
+    fontsize=18, color="#0a8a3a", fontweight="bold"
+)
+
+ax.text(
+    (safe_limit + warning_limit) / 2, -0.18, warning_label,
+    transform=ax.get_xaxis_transform(),
+    ha="center", va="center",
+    fontsize=18, color="#c79a00", fontweight="bold"
+)
+
+ax.text(
+    (warning_limit + x_max) / 2, -0.18, risk_label,
+    transform=ax.get_xaxis_transform(),
+    ha="center", va="center",
+    fontsize=18, color="#d92c16", fontweight="bold"
+)
+
+for idx, actual in enumerate(df_plot[ratio_col].fillna(0).values):
+    if actual > x_max:
+        ax.text(
+            x_max - 0.03, idx, f">{x_max:.1f}",
+            va="center", ha="right",
+            color="white", fontsize=10, fontweight="bold"
+        )
+
+ax.invert_yaxis()
+fig.subplots_adjust(bottom=0.28)
+
+return fig
 
 def build_system_limits_chart_multi(
     df_ratio,
