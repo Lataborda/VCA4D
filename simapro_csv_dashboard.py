@@ -237,7 +237,7 @@ def build_system_limits_chart(
             )
     
     ax.invert_yaxis()
-    fig.subplots_adjust(bottom=0.28)
+    fig.subplots_adjust(bottom=0.30)
     
     return fig
 
