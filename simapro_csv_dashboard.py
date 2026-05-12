@@ -275,14 +275,13 @@ def build_system_limits_chart_multi(
     entity_order = df_plot[entity_col].drop_duplicates().tolist()
 
     # Colores y siglas
-    entity_styles = {
+        entity_styles = {
         "Amidon": {"color": "#1f77b4", "short": "A"},
         "Bobolo": {"color": "#ff7f0e", "short": "B"},
-        "Farine P. Industriel": {"color": "#17becf", "short": "FI"},
-        "Farine P. Rurale": {"color": "#8c564b", "short": "FR"},
+        "Farine P.Industriel": {"color": "#17becf", "short": "FI"},
+        "Farine P.Rurale": {"color": "#8c564b", "short": "FR"},
         "Gari": {"color": "#9467bd", "short": "G"},
     }
-
     default_color = "#4d4d4d"
 
     n_cat = len(category_order)
