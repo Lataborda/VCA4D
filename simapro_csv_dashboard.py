@@ -374,38 +374,39 @@ def build_system_limits_chart_multi(
 
     ax.set_title(title, fontsize=20, fontweight="bold")
 
-    # Bajar un poco más las etiquetas de zonas
+    # Etiquetas de zonas: mantenerlas visibles y separadas de la leyenda
     ax.text(
-        safe_limit / 2, -0.20, safe_label,
+        safe_limit / 2, -0.16, safe_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#0a8a3a", fontweight="bold"
     )
     ax.text(
-        (safe_limit + warning_limit) / 2, -0.20, warning_label,
+        (safe_limit + warning_limit) / 2, -0.16, warning_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#c79a00", fontweight="bold"
     )
     ax.text(
-        (warning_limit + x_max) / 2, -0.20, risk_label,
+        (warning_limit + x_max) / 2, -0.16, risk_label,
         transform=ax.get_xaxis_transform(),
         ha="center", va="center",
         fontsize=18, color="#d92c16", fontweight="bold"
     )
 
+    # Leyenda más abajo para evitar superposición con las etiquetas de zonas
     ax.legend(
         title="Produit",
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.18),
+        bbox_to_anchor=(0.5, -0.30),
         ncol=min(5, n_ent),
         frameon=True
     )
 
     ax.invert_yaxis()
 
-    # Más margen inferior para que no se monten textos
-    fig.subplots_adjust(bottom=0.32)
+    # Mayor margen inferior para acomodar etiquetas + leyenda
+    fig.subplots_adjust(bottom=0.42)
 
     return fig
 
