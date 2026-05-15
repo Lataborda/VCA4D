@@ -274,14 +274,33 @@ def build_system_limits_chart_multi(
     # Orden de entidades
     entity_order = df_plot[entity_col].drop_duplicates().tolist()
 
-    # Colores y siglas
-    entity_styles = {
-        "Amidon": {"color": "#1f77b4", "short": "A"},
-        "Bobolo": {"color": "#ff7f0e", "short": "B"},
-        "Farine P.Industriel": {"color": "#17becf", "short": "FI"},
-        "Farine P.Rurale": {"color": "#8c564b", "short": "FR"},
-        "Gari": {"color": "#9467bd", "short": "G"},
-    }
+        # Colores y siglas de los productos
+    default_color = "#4d4d4d"
+
+    def get_entity_style(entity):
+        """
+        Assign colors and short labels robustly,
+        even if the entity name includes 'VC' or small spacing variations.
+        """
+        name = str(entity).strip().lower()
+
+        if "amidon" in name:
+            return {"color": "#1f77b4", "short": "A"}
+
+        elif "bobolo" in name:
+            return {"color": "#ff7f0e", "short": "B"}
+
+        elif "industriel" in name:
+            return {"color": "#17becf", "short": "FI"}
+
+        elif "rurale" in name:
+            return {"color": "#8c564b", "short": "FR"}
+
+        elif "gari" in name:
+            return {"color": "#9467bd", "short": "G"}
+
+        else:
+            return {"color": default_color, "short": str(entity)[:1].upper()}
     default_color = "#4d4d4d"
 
     n_cat = len(category_order)
@@ -335,8 +354,9 @@ def build_system_limits_chart_multi(
                 ratios.append(0.0)
 
         ratios_clipped = np.clip(ratios, 0, x_max)
-        color = entity_styles.get(entity, {}).get("color", default_color)
-        short_label = entity_styles.get(entity, {}).get("short", entity[:1].upper())
+        style = get_entity_style(entity)
+        color = style["color"]
+        short_label = style["short"]
 
         ax.barh(
             offsets,
