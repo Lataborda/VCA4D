@@ -253,14 +253,23 @@ def build_system_limits_chart_multi(
     safe_label="Espace sûr",
     warning_label="Zone d'attention",
     risk_label="Risque élevé",
-    title="Comparaison des produits vs limites du système"
+    title="Comparaison des produits vs limites du système",
+    show_values=True,
 ):
+    """PB-LCA style system-limits chart con diseño profesional.
+
+    Mejoras frente a la versión anterior:
+    - Paleta de colores más sobria (zonas y productos).
+    - Valores numéricos al final de cada barra en lugar de siglas internas.
+    - Etiquetas de zona discretas en la parte superior.
+    - Spines y guías visuales pulidas.
+    """
     import numpy as np
     import matplotlib.pyplot as plt
 
     df_plot = df_ratio.copy()
 
-    # Orden de categorías
+    # ---- Orden de categorías y entidades ----
     if order_col in df_plot.columns:
         category_order = (
             df_plot[[label_col, order_col]]
@@ -271,72 +280,74 @@ def build_system_limits_chart_multi(
     else:
         category_order = df_plot[label_col].drop_duplicates().tolist()
 
-    # Orden de entidades
     entity_order = df_plot[entity_col].drop_duplicates().tolist()
 
-        # Colores y siglas de los productos
-    default_color = "#4d4d4d"
+    # ---- Paleta de productos (asignación robusta por nombre) ----
+    product_palette = {
+        "amidon":     "#2E5C8A",   # azul profundo
+        "bobolo":     "#E07B39",   # naranja terracota
+        "industriel": "#2A9D8F",   # verde azulado
+        "rurale":     "#8B5A3C",   # marrón cálido
+        "gari":       "#6A4C93",   # púrpura
+    }
 
-    def get_entity_style(entity):
-        """
-        Assign colors and short labels robustly,
-        even if the entity name includes 'VC' or small spacing variations.
-        """
+    def get_entity_color(entity):
         name = str(entity).strip().lower()
-
-        if "amidon" in name:
-            return {"color": "#1f77b4", "short": "A"}
-
-        elif "bobolo" in name:
-            return {"color": "#ff7f0e", "short": "B"}
-
-        elif "industriel" in name:
-            return {"color": "#17becf", "short": "FI"}
-
-        elif "rurale" in name:
-            return {"color": "#8c564b", "short": "FR"}
-
-        elif "gari" in name:
-            return {"color": "#9467bd", "short": "G"}
-
-        else:
-            return {"color": default_color, "short": str(entity)[:1].upper()}
-    default_color = "#4d4d4d"
+        for key, color in product_palette.items():
+            if key in name:
+                return color
+        return "#555555"
 
     n_cat = len(category_order)
     n_ent = len(entity_order)
 
-    fig, ax = plt.subplots(figsize=(14, max(7, n_cat * 1.6)))
+    # ---- Tipografía global ----
+    plt.rcParams.update({
+        "font.family": "DejaVu Sans",
+        "axes.edgecolor": "#333333",
+        "axes.linewidth": 0.8,
+    })
 
-    # Fondo por zonas
-    ax.axvspan(0, safe_limit, color="#0a8a3a", alpha=1.0, zorder=0)
-    ax.axvspan(safe_limit, warning_limit, color="#f2c500", alpha=1.0, zorder=0)
-    ax.axvspan(warning_limit, x_max, color="#ef2b0c", alpha=1.0, zorder=0)
+    # ---- Figura ----
+    fig, ax = plt.subplots(figsize=(15, max(7, n_cat * 1.4)))
+    fig.patch.set_facecolor("white")
 
-    # Guías verticales
+    # ---- Colores de zona (más suaves) ----
+    color_safe = "#7FB069"
+    color_warning = "#F4C95D"
+    color_risk = "#D9534F"
+
+    ax.axvspan(0, safe_limit, color=color_safe, alpha=0.85, zorder=0)
+    ax.axvspan(safe_limit, warning_limit, color=color_warning, alpha=0.85, zorder=0)
+    ax.axvspan(warning_limit, x_max, color=color_risk, alpha=0.85, zorder=0)
+
+    # ---- Líneas verticales: sutiles cada 0.5, marcadas en umbrales ----
     for x in np.arange(0.5, x_max + 0.001, 0.5):
-        ax.axvline(x, color="white", lw=1.5, alpha=0.85, zorder=1)
+        is_threshold = np.isclose(x, safe_limit) or np.isclose(x, warning_limit)
+        ax.axvline(
+            x,
+            color="white",
+            lw=2.2 if is_threshold else 0.8,
+            alpha=0.95 if is_threshold else 0.45,
+            zorder=1,
+        )
 
-    ax.axvline(safe_limit, color="white", lw=2.7, zorder=2)
-    ax.axvline(warning_limit, color="white", lw=2.7, zorder=2)
+    # ---- Posiciones Y con espaciado generoso ----
+    y_base = np.arange(n_cat) * 1.35
 
-    # MÁS ESPACIO ENTRE CATEGORÍAS
-    y_base = np.arange(n_cat) * 1.25
-
-    # Líneas horizontales punteadas entre categorías
     separator_y = (y_base[:-1] + y_base[1:]) / 2
     for y in separator_y:
         ax.hlines(
             y, 0, x_max,
             colors="white",
-            linestyles=(0, (2, 3)),
-            linewidth=1.0,
-            alpha=0.7,
-            zorder=2
+            linestyles=(0, (1, 4)),
+            linewidth=0.8,
+            alpha=0.5,
+            zorder=2,
         )
 
-    # Barras finas por entidad dentro de cada categoría
-    group_height = 0.82
+    # ---- Barras agrupadas ----
+    group_height = 0.95
     bar_height = group_height / max(n_ent, 1)
 
     for i, entity in enumerate(entity_order):
@@ -348,85 +359,111 @@ def build_system_limits_chart_multi(
                 (df_plot[label_col] == cat) &
                 (df_plot[entity_col] == entity)
             ]
-            if len(subset) > 0:
-                ratios.append(float(subset[ratio_col].iloc[0]))
-            else:
-                ratios.append(0.0)
+            ratios.append(float(subset[ratio_col].iloc[0]) if len(subset) > 0 else 0.0)
 
         ratios_clipped = np.clip(ratios, 0, x_max)
-        style = get_entity_style(entity)
-        color = style["color"]
-        short_label = style["short"]
+        color = get_entity_color(entity)
 
         ax.barh(
             offsets,
             ratios_clipped,
-            height=bar_height * 0.78,
+            height=bar_height * 0.88,
             color=color,
-            edgecolor="white",
-            linewidth=0.9,
+            edgecolor="none",
             zorder=3,
-            label=entity
+            label=entity,
         )
 
-        # Etiquetas blancas dentro de las barras
-        for y, val in zip(offsets, ratios_clipped):
-            if val > 0.10:
-                x_text = max(min(val - 0.03, x_max - 0.05), 0.04)
+        # Valores numéricos al final de cada barra significativa
+        if show_values:
+            for y, val, original in zip(offsets, ratios_clipped, ratios):
+                if original > x_max:
+                    label_text = f">{x_max:.1f}"
+                    text_color = "white"
+                    x_text = x_max - 0.05
+                    ha = "right"
+                elif val >= 0.05:
+                    label_text = f"{original:.2f}"
+                    x_text = val + 0.03
+                    if x_text <= safe_limit:
+                        text_color = "#1B3A1B"
+                    elif x_text <= warning_limit:
+                        text_color = "#5C4400"
+                    else:
+                        text_color = "#5C0000"
+                    ha = "left"
+                else:
+                    continue
+
                 ax.text(
-                    x_text,
-                    y,
-                    short_label,
-                    va="center",
-                    ha="right",
-                    color="white",
-                    fontsize=8.5,
-                    fontweight="bold",
-                    zorder=4
+                    x_text, y, label_text,
+                    va="center", ha=ha,
+                    color=text_color,
+                    fontsize=8.5, fontweight="600",
+                    zorder=4,
                 )
 
+    # ---- Eje Y ----
     ax.set_yticks(y_base)
-    ax.set_yticklabels(category_order, fontsize=13)
+    ax.set_yticklabels(category_order, fontsize=12, color="#222222")
+    ax.tick_params(axis="y", length=0, pad=8)
+
+    # ---- Eje X ----
     ax.set_xlim(0, x_max)
+    ax.set_xlabel("Impact / SoSOS ratio", fontsize=12, color="#333333", labelpad=10)
+    ax.tick_params(axis="x", colors="#555555", labelsize=10)
 
-    # Separar mejor el xlabel de las etiquetas de zona
-    ax.set_xlabel("Impact / SoSOS ratio", fontsize=13, labelpad=0)
+    # ---- Spines limpios ----
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+    ax.spines["left"].set_color("#888888")
+    ax.spines["bottom"].set_color("#888888")
 
-    ax.set_title(title, fontsize=20, fontweight="bold")
-
-    # Etiquetas de zonas: mantenerlas visibles y separadas de la leyenda
-    ax.text(
-        safe_limit / 2, -0.16, safe_label,
-        transform=ax.get_xaxis_transform(),
-        ha="center", va="center",
-        fontsize=18, color="#0a8a3a", fontweight="bold"
-    )
-    ax.text(
-        (safe_limit + warning_limit) / 2, -0.16, warning_label,
-        transform=ax.get_xaxis_transform(),
-        ha="center", va="center",
-        fontsize=18, color="#c79a00", fontweight="bold"
-    )
-    ax.text(
-        (warning_limit + x_max) / 2, -0.16, risk_label,
-        transform=ax.get_xaxis_transform(),
-        ha="center", va="center",
-        fontsize=18, color="#d92c16", fontweight="bold"
+    # ---- Título alineado a la izquierda (estilo editorial) ----
+    ax.set_title(
+        title,
+        fontsize=17, fontweight="bold",
+        color="#1a1a1a",
+        pad=42,
+        loc="left",
     )
 
-    # Leyenda más abajo para evitar superposición con las etiquetas de zonas
-    ax.legend(
+    # ---- Etiquetas de zona arriba del gráfico ----
+    def spaced(s):
+        return " ".join(list(s.upper()))
+
+    y_top = 1.015
+    ax.text(safe_limit / 2, y_top, spaced(safe_label),
+            transform=ax.get_xaxis_transform(),
+            ha="center", va="bottom",
+            fontsize=10, color=color_safe, fontweight="bold")
+    ax.text((safe_limit + warning_limit) / 2, y_top, spaced(warning_label),
+            transform=ax.get_xaxis_transform(),
+            ha="center", va="bottom",
+            fontsize=10, color="#C19000", fontweight="bold")
+    ax.text((warning_limit + x_max) / 2, y_top, spaced(risk_label),
+            transform=ax.get_xaxis_transform(),
+            ha="center", va="bottom",
+            fontsize=10, color=color_risk, fontweight="bold")
+
+    # ---- Leyenda inferior ----
+    legend = ax.legend(
         title="Produit",
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.30),
+        bbox_to_anchor=(0.5, -0.13),
         ncol=min(5, n_ent),
-        frameon=True
+        frameon=False,
+        fontsize=11,
+        title_fontsize=11,
+        handlelength=1.2,
+        handleheight=1.2,
+        columnspacing=2.0,
     )
+    legend.get_title().set_fontweight("bold")
+    legend.get_title().set_color("#333333")
 
     ax.invert_yaxis()
-
-    # Mayor margen inferior para acomodar etiquetas + leyenda
-    fig.subplots_adjust(bottom=0.42)
+    fig.subplots_adjust(left=0.18, right=0.97, top=0.88, bottom=0.20)
 
     return fig
 
